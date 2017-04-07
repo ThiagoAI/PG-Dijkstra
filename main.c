@@ -51,9 +51,8 @@ int main (int argc, char** argv){
   int temp_i2;
   double temp_d;
   
-  //Criando array de vertices
-  vertice** vertices = (vertice**)malloc(sizeof(vertice*)*(n_vertices));
-  for(i=0;i<n_vertices;i++) vertices[i] = NULL;
+  //Declaração do array de vertices que sera inicializado durante leitura
+  vertice** vertices;
  
   /*
   int read;
@@ -67,73 +66,99 @@ int main (int argc, char** argv){
   
   //Pegamos o nome
   while( fscanf(gr,"%s", buffer)){
-   if(strcmp(buffer,"p") == 0){
-     fscanf(gr,"%s", type);
-     fscanf(gr,"%d", &n_vertices);
-     fscanf(gr,"%d", &n_edges);
-     printf("Vertices and Edges: %d | %d\n", n_vertices, n_edges);
-   }
+    if(strcmp(buffer,"p") == 0){
+      fscanf(gr,"%s", type);
+      fscanf(gr,"%d", &n_vertices);
+      fscanf(gr,"%d", &n_edges);
+      printf("Vertices and Edges: %d | %d\n", n_vertices, n_edges);
 
-   if(strcmp(buffer,"a") == 0){
-     vertice* new_vertice1;
-     vertice* new_vertice2;
-     edge* new_edge;
+      //Agora que sabemos quantos vertices inicializamos o array de vertices
+      //+1 é para contar a possibilidade de começar em 0 ou 1, não fara diferença 
+      vertices = (vertice**)malloc(sizeof(vertice*)*(n_vertices+1));
+      for(i=0;i<n_vertices;i++) vertices[i] = NULL;
 
-     fscanf(gr,"%d", &temp_i1);
-    
-     new_vertice1 = create_vertice(temp_i1);
-     vertices[temp_i1] = new_vertice1;
-     
+    }
+
+		//Se entra aqui é porque encontramos a primeira aresta, pegamos ela e saimos desse loop.
+    if(strcmp(buffer,"a") == 0){
+      vertice* new_vertice1;
+      vertice* new_vertice2;
+      edge* new_edge;
+
+      fscanf(gr,"%d", &temp_i1);
+
+      new_vertice1 = create_vertice(temp_i1);
+      vertices[temp_i1] = new_vertice1;
    
-     fscanf(gr,"%d", &temp_i2);
+      fscanf(gr,"%d", &temp_i2);
      
-     new_vertice2 = create_vertice(temp_i2);
-     vertices[temp_i2] = new_vertice2;
+      new_vertice2 = create_vertice(temp_i2);
+      vertices[temp_i2] = new_vertice2;
 
-     fscanf(gr,"%lf", &temp_d);
+      fscanf(gr,"%lf", &temp_d);
 
-     new_edge = create_edge(vertices[temp_i1]->id,vertices[temp_i2]->id,temp_d);
-     add_edge(vertices[temp_i1],vertices[temp_i2],new_edge);
-     break;
-   }
+      new_edge = create_edge(vertices[temp_i1]->id,vertices[temp_i2]->id,temp_d);
+      add_edge(vertices[temp_i1],vertices[temp_i2],new_edge);
+
+      //Ignoramos a próxima
+		  fscanf(gr,"%s", buffer);
+      fscanf(gr,"%d", &temp_i1);
+      fscanf(gr,"%d", &temp_i2);
+      fscanf(gr,"%lf", &temp_d);
+
+      break;
+    }
   }  
 
-  //Lemos as arestas
-  for(i=0;i<n_edges;i++){
+  //Lemos as arestas. O /2 é pois cada aresta aparece 2x uma seguida da outra e o -1 é pois já lemos a primeira antes.
+  for(i=0;i<((n_edges/2)-1);i++){
     vertice* new_vertice1;
     vertice* new_vertice2;
     edge* new_edge;
 
     //Lê o 'a'
-    fscanf(gr,"%s", &buffer);
+    fscanf(gr,"%s", buffer);
 
     fscanf(gr,"%d", &temp_i1);
-    if(vertices[temp_i1] != NULL){
+
+    if(vertices[temp_i1] == NULL){
+      //printf("null1\n");
       new_vertice1 = create_vertice(temp_i1);
       vertices[temp_i1] = new_vertice1;
     }
-   
+
     fscanf(gr,"%d", &temp_i2);
-    if(vertices[temp_i2] != NULL){
+
+    if(vertices[temp_i2] == NULL){
+      //printf("null2\n");
       new_vertice2 = create_vertice(temp_i2);
       vertices[temp_i2] = new_vertice2;
     }
 
     fscanf(gr,"%lf", &temp_d);
-    // printf("Y: %lf\n", temp);
 
+    //printf("gr3: %lf | %d | %d\n\n\n\n",temp_d,vertices[temp_i1]->id,vertices[temp_i2]->id);
     new_edge = create_edge(vertices[temp_i1]->id,vertices[temp_i2]->id,temp_d);
+
     add_edge(vertices[temp_i1],vertices[temp_i2],new_edge);
+
+    //Ignoramos próxima linha pois será repetição da linha anterior
+    fscanf(gr,"%s", buffer);
+    fscanf(gr,"%d", &temp_i1);
+    fscanf(gr,"%d", &temp_i2);
+    fscanf(gr,"%lf", &temp_d);
   }
   
   fclose(gr);
+
+	print_vertices(vertices,n_vertices);
   
    /*
   * !!!
   * FIM DA LEITURA !!!
   * !!!
   */
-
+  printf("WE DID IT\n\n\n\n");
   return 0;
   
 }

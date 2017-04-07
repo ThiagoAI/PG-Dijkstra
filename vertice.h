@@ -10,4 +10,5 @@ typedef struct vertice_struct{
 
 vertice* create_vertice(int x);
 void add_edge(vertice* x,vertice* y,edge* e);
+void print_vertices(vertice** vertices,int n_vertices);
 #endif

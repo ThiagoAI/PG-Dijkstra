@@ -1,5 +1,5 @@
 #include <stdlib.h>
-
+#include <stdio.h>
 #include "vertice.h"
 #include "list.h"
 #include "edge.h"
@@ -29,9 +29,52 @@ void add_edge(vertice* x,vertice* y,edge* e){
     x->edges = new1;
   }
 
-  if(y->edges == NULL) x->edges = new2;
+  if(y->edges == NULL) y->edges = new2;
   else{
-    new2->next = x->edges;
-    x->edges = new2;
+    new2->next = y->edges;
+    y->edges = new2;
   }
+}
+
+//Função de print para teste
+//USE APENAS APÓS LEITURA
+void print_vertices(vertice** vertices,int n_vertices){
+  if(n_vertices == 0){
+    printf("Erro ao tentar imprimir vertices: numero de vertices e 0.\n\n");
+    return;
+  }
+
+  printf("Comecando print de teste para %d vertices...\n\n",n_vertices);
+
+  int i = 0;
+  edge_list* temp;  
+  if(vertices[0] != NULL){
+    for(i=0;i<n_vertices;i++){
+      printf(":%d ",vertices[i]->id);
+      temp = vertices[i]->edges;
+
+      while(temp != NULL){
+				printf("|%d %d %lf| ", temp->edge->v1, temp->edge->v2,temp->edge->weight); 
+        temp = temp->next;
+      }
+    	
+			printf("\n\n");
+    }
+
+  }
+  else{
+		for(i=1;i<n_vertices+1;i++){ 
+      printf(":%d ",vertices[i]->id);
+      temp = vertices[i]->edges;
+
+      while(temp != NULL){
+				printf("|%d %d %lf| ", temp->edge->v1, temp->edge->v2,temp->edge->weight); 
+        temp = temp->next;
+      }
+    	
+			printf("\n\n");
+    }
+
+  }
+
 }
