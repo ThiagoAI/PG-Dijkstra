@@ -8,4 +8,5 @@ typedef struct edge_struct{
   double weight;
 }edge;
 
+edge* create_edge(int x,int y,double w);
 #endif

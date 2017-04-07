@@ -8,5 +8,6 @@ typedef struct vertice_struct{
   edge_list* edges;
 }vertice;
 
-void add_edge(vertice* v,edge_list* e);
+vertice* create_vertice(int x);
+void add_edge(vertice* x,vertice* y,edge* e);
 #endif

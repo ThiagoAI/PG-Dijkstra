@@ -5,7 +5,9 @@
 #include <limits.h>
 #include <unistd.h>
 
-#include "point.h"
+#include "edge.h"
+#include "vertice.h"
+#include "list.h"
 #include "fibheap.h"
 #include "graph.h"
 
@@ -42,8 +44,17 @@ int main (int argc, char** argv){
    printf("\nERRO: ARQUIVO NULO, VERIFIQUE SE O CAMINHO ESTÁ CORRETO!\n");
    return 1;
   }
+
+  //Variaveis de leitura
   char buffer[1024];
+  int temp_i1;
+  int temp_i2;
+  double temp_d;
   
+  //Criando array de vertices
+  vertice** vertices = (vertice**)malloc(sizeof(vertice*)*(n_vertices));
+  for(i=0;i<n_vertices;i++) vertices[i] = NULL;
+ 
   /*
   int read;
   while(fgets(buffer, 1024, tsp)){
@@ -64,31 +75,58 @@ int main (int argc, char** argv){
    }
 
    if(strcmp(buffer,"a") == 0){
+     vertice* new_vertice1;
+     vertice* new_vertice2;
+     edge* new_edge;
+
+     fscanf(gr,"%d", &temp_i1);
+    
+     new_vertice1 = create_vertice(temp_i1);
+     vertices[temp_i1] = new_vertice1;
+     
+   
+     fscanf(gr,"%d", &temp_i2);
+     
+     new_vertice2 = create_vertice(temp_i2);
+     vertices[temp_i2] = new_vertice2;
+
+     fscanf(gr,"%lf", &temp_d);
+
+     new_edge = create_edge(vertices[temp_i1]->id,vertices[temp_i2]->id,temp_d);
+     add_edge(vertices[temp_i1],vertices[temp_i2],new_edge);
      break;
    }
-  } 
+  }  
+
+  //Lemos as arestas
+  for(i=0;i<n_edges;i++){
+    vertice* new_vertice1;
+    vertice* new_vertice2;
+    edge* new_edge;
+
+    //Lê o 'a'
+    fscanf(gr,"%s", &buffer);
+
+    fscanf(gr,"%d", &temp_i1);
+    if(vertices[temp_i1] != NULL){
+      new_vertice1 = create_vertice(temp_i1);
+      vertices[temp_i1] = new_vertice1;
+    }
    
-  //Double temporário para leitura
-  double temp;
-  
-  //Criando array de pontos
-  vertice** vertices = (vertice**)malloc(sizeof(vertice*)*(n_vertices));
-  
-  //Lendo os pontos
-  for(i=0;i<size;i++){
-   point* new_point = (point*)malloc(sizeof(point));
-   fscanf(tsp,"%lf", &temp);
-   fscanf(tsp,"%lf", &temp);
-   // printf("X: %lf\n", temp);
-   new_point->x = temp;
-   fscanf(tsp,"%lf", &temp);
-   // printf("Y: %lf\n", temp);
-   new_point->y = temp;
-   new_point->id = i;
-   points[i] = new_point;
+    fscanf(gr,"%d", &temp_i2);
+    if(vertices[temp_i2] != NULL){
+      new_vertice2 = create_vertice(temp_i2);
+      vertices[temp_i2] = new_vertice2;
+    }
+
+    fscanf(gr,"%lf", &temp_d);
+    // printf("Y: %lf\n", temp);
+
+    new_edge = create_edge(vertices[temp_i1]->id,vertices[temp_i2]->id,temp_d);
+    add_edge(vertices[temp_i1],vertices[temp_i2],new_edge);
   }
   
-  fclose(tsp);
+  fclose(gr);
   
    /*
   * !!!

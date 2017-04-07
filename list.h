@@ -8,7 +8,4 @@ typedef struct node_list{
   edge* edge;
 }edge_list;
 
-//Funções básicas
-edge_list* create_list(int id1,int id2,double w);
-
 #endif
