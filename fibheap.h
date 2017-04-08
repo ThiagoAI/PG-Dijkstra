@@ -24,8 +24,7 @@ typedef struct fib_heapstruct{
   //Número de nodos
   int n;
   //Mínimo da heap
-  fib_node min;
-
+  fib_node* min;
 }fib_heap;
 
 //Funções básicas
