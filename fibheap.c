@@ -58,10 +58,29 @@ void insert(fib_heap* heap,fib_node* node){
 	heap->n++;
 }
 
-
+//Fazemos do nodo y filho do nodo x
 void heap_link(fib_node* y,fib_node* x){
 
+	y->left->right = y->right;
+	y->right->left = y->left;
 
+	if(x->child != NULL){
+
+		x->child->left->right = y;
+		y->left = x->child->left;
+		x->child->left = y;
+		y->right = x->child;
+	}
+	else{
+
+		x->child = y;
+		y->right = y;
+		y->left = y;
+	}
+
+	y->parent = x;
+	x->degree++;
+	y->mark = 0;
 }	
 
 //Consolida a heap, é chamada por extract-min
