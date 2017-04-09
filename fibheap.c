@@ -37,6 +37,12 @@ fib_node* create_node(int id){
 //Insere nodo na heap
 void insert(fib_heap* heap,fib_node* node){
 
+	//Para o caso do nodo ter sido usado anteriormente (não muda nada se ele é novo)
+	node->degree = 0;
+	node->parent = NULL;
+	node->child = NULL;
+	node->mark = 0;
+
   //Se a heap está vazia o primeiro novo é o mínimo
 	if(heap->min == NULL){
 		node->right = node;
@@ -248,6 +254,94 @@ fib_node* extract_min(fib_heap* heap){
 	heap->n--;
 	
   return temp_min; 
+}
+
+//Função auxiliar para decreace_key, x é o filho de y.
+void cut(fib_heap* heap,fib_node* x,fib_node* y){
+
+	if(x->right == x){
+		y->child = NULL;
+	}
+	else{
+
+		x->right->left = x->left;
+		x->left->right = x->right;
+				
+		//Se x for a child guardada em y, temos que mudar
+		if(y->child->id == x->id) y->child = x->right;
+
+	}
+	//Perdeu um filho
+	y->degree--;
+
+	//Inserimos na rootlist
+	heap->min->right->left = x;
+	x->right = heap->min->right;
+	heap->min->right = x;
+	x->left = heap->min;
+
+	//Esta na rootlist, atualizamos pai e mark
+	x->parent = NULL;
+	x->mark = 0;
+}
+
+//Auxiliar de decreace_key, método recursivo que também chama cut
+void cascading_cut(fib_heap* heap,fib_node* y){
+
+	//Variável para guardar o pai de y
+	fib_node* z;
+	z = y->parent;
+	
+	//Se tem pai ai entramos
+	if(z != NULL){
+		//Se não tem marca, temos que marcar
+		if(y->mark == 0){
+			y->mark = 1;
+		}
+		else{
+			cut(heap,y,z);
+			cascading_cut(heap,z);
+		}
+
+	}//Fim do if z != NULL
+
+}
+
+//Diminui o valor da chave de um dos nodos e executa o necessário para manter a estrutura da heap após esta operação
+void decreace_key(fib_heap* heap,fib_node* x,int new_key){
+	
+	//Checamos se a chave nova é menor, se não paramos o programa, nunca devia entrar neste if
+	if(new_key > x->key){
+		printf("ERRO FATAL: Chave inserida é maior do que a anterior, erro no algorítimo!\n\n");
+		exit(1);
+	}
+
+	//Variável temporária
+	fib_node* y;
+
+	//Mudamos o valor
+	x->key = new_key;
+
+	//Guardamos o pai de x	
+	y = x->parent;
+
+	//Se o pai não for nulo...
+	if(y != NULL){
+		//Se for menor que o pai, temos que corrigir a estrutura
+		if(x->key < y->key){
+
+			//Para acertar a estrutura
+			cut(heap,x,y);
+			cascading_cut(heap,y);
+
+		}
+	}//Fim do if y != NULL
+
+	//Se for menor que o mínimo, vira o novo mínimo
+	if(x->key < heap->min->key){
+		heap->min = x;
+	} 	
+
 }
 
 

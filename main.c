@@ -151,7 +151,8 @@ int main (int argc, char** argv){
   
   fclose(gr);
 
-	print_vertices(vertices,n_vertices);
+	//print de teste
+	//print_vertices(vertices,n_vertices);
   
  /*
   * !!!
@@ -160,22 +161,29 @@ int main (int argc, char** argv){
   */
 
 	//TESTE PARA A FIBONACCI HEAP
-	fib_heap* heap = create_heap();
+	/*fib_heap* heap = create_heap();
+	fib_node** nodes =(fib_node**)malloc(sizeof(fib_node*)*n_vertices);
 
-	/*for(i=0;i < n_vertices;i++){
+	for(i=0;i < n_vertices;i++){
 		//printf("oi\n");
 		fib_node* new = create_node(vertices[i+1]->id);
+		nodes[i] = new;
 		//if(i == 1) new->key = 2;
 		insert(heap,new);
 	}
 
 	fib_node* x = extract_min(heap);
 	printf("|%d|\n",x->id);
+	decreace_key(heap,nodes[100],5);
+	decreace_key(heap,nodes[1],4);
 	x = extract_min(heap);
-
+	printf("|%d|\n",x->id);
+	x = extract_min(heap);
+	printf("|%d|\n",x->id);
+	
 	fib_node* temp = heap->min;
-	x = temp;
-	do{
+	x = temp;*/
+	/*do{
 	  printf("|%d|\n",x->id);
 		if(x->child != NULL) printf("||%d||\n",x->child->id);
 		if(x->child != NULL && x->child->right->id != x->child->id)printf("|||%d|||\n",x->child->right->id);
