@@ -13,7 +13,7 @@
  */
 
 //Inicializamos a heap
-fib_heap* create_heap(){
+fib_heap* create_heap_fib(){
 	fib_heap* new = (fib_heap*)malloc(sizeof(fib_heap));
   new->n = 0;
   new->min = NULL;
@@ -21,7 +21,7 @@ fib_heap* create_heap(){
 }
 
 //Inicialização do nodo
-fib_node* create_node(int id){
+fib_node* create_node_fib(int id){
 	fib_node* new = (fib_node*)malloc(sizeof(fib_node));
 	new->id = id;
   new->key = DBL_MAX;
@@ -35,7 +35,7 @@ fib_node* create_node(int id){
 }
 
 //Insere nodo na heap
-void insert(fib_heap* heap,fib_node* node){
+void insert_fib(fib_heap* heap,fib_node* node){
 
 	//Para o caso do nodo ter sido usado anteriormente (não muda nada se ele é novo)
 	node->degree = 0;
@@ -195,7 +195,7 @@ void consolidate(fib_heap* heap){
 }
 
 //Extrai o mínimo da heap
-fib_node* extract_min(fib_heap* heap){
+fib_node* extract_min_fib(fib_heap* heap){
 	//Variaveis contadoras e temporárias
 	int i = 0;
 	fib_node* temp_min;
@@ -308,7 +308,7 @@ void cascading_cut(fib_heap* heap,fib_node* y){
 }
 
 //Diminui o valor da chave de um dos nodos e executa o necessário para manter a estrutura da heap após esta operação
-void decreace_key(fib_heap* heap,fib_node* x,int new_key){
+void decreace_key_fib(fib_heap* heap,fib_node* x,int new_key){
 	
 	//Checamos se a chave nova é menor, se não paramos o programa, nunca devia entrar neste if
 	if(new_key > x->key){

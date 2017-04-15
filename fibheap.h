@@ -28,10 +28,10 @@ typedef struct fib_heapstruct{
 }fib_heap;
 
 //Funções básicas
-fib_heap* create_heap();
-fib_node* create_node(int id);
-void insert(fib_heap* heap,fib_node* node);
-fib_node* extract_min(fib_heap* heap);
-void decreace_key(fib_heap* heap,fib_node* x,int new_key);
+fib_heap* create_heap_fib();
+fib_node* create_node_fib(int id);
+void insert_fib(fib_heap* heap,fib_node* node);
+fib_node* extract_min_fib(fib_heap* heap);
+void decreace_key_fib(fib_heap* heap,fib_node* x,int new_key);
 
 #endif
