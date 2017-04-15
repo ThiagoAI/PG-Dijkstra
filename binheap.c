@@ -30,15 +30,15 @@ bin_node* create_node_bin(int id){
 //FUNÇÕES PARA ACHAR OS "RELATIVES" DO NODO
 //Note que usamos index-1 para o pai pois os IDs dos testes começam em 1
 int parent(int index){
-	return (index - 1)/2;
+	return (index)/2;
 }
 
 int left(int index){
-	return (2 * index + 1);
+	return (2 * index);
 }
 
 int right(int index){
-	return (2 * index + 2);
+	return (2 * index + 1);
 }
 
 //Insere na heap

@@ -5,7 +5,7 @@
 //Grafo
 typedef struct graph_struct{
   int nv;
-  int na;
+  int ne;
   vertice** vertices;
 }graph;
 

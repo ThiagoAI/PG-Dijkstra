@@ -4,14 +4,18 @@
 #include <time.h>
 #include <limits.h>
 #include <unistd.h>
+#include <float.h>
 
 #include "edge.h"
 #include "vertice.h"
 #include "list.h"
 #include "fibheap.h"
+#include "binheap.h"
 #include "graph.h"
+#include "dijkstra.h"
 
 //Argumento 1 = Arquivo
+//Argumento 2 = Binário (1) ou fibonacci (2)
 int main (int argc, char** argv){
   
   //Verifica se o número de argumentos está correto
@@ -19,9 +23,15 @@ int main (int argc, char** argv){
    printf("ERRO: NÚMERO DE ARGUMENTOS ESTÁ ERRADO!\n");
    return 1;
   }
-  
+
+	int choice = 0;
+	//Se não foi dado opção escolhe binário
+	if(argc != 3) choice = 1;
+	else choice = atoi(argv[2]);
+
   //Variável contadora
   int i = 0;
+	int u = 0;
   
   //Variáveis que obteremos do arquivo
   char type[1024];
@@ -65,16 +75,16 @@ int main (int argc, char** argv){
   //printf("aii %s\n",buffer);
   
   //Pegamos o nome
-  while( fscanf(gr,"%s", buffer)){
+  while(fscanf(gr,"%s", buffer)){
     if(strcmp(buffer,"p") == 0){
-      fscanf(gr,"%s", type);
-      fscanf(gr,"%d", &n_vertices);
-      fscanf(gr,"%d", &n_edges);
+      u=fscanf(gr,"%s", type);
+      u=fscanf(gr,"%d", &n_vertices);
+      u=fscanf(gr,"%d", &n_edges);
       printf("Vertices and Edges: %d | %d\n", n_vertices, n_edges);
 
       //Agora que sabemos quantos vertices inicializamos o array de vertices
       //+1 é para contar a possibilidade de começar em 0 ou 1, não fara diferença 
-      vertices = (vertice**)malloc(sizeof(vertice*)*(n_vertices+1));
+      vertices = (vertice**)malloc(sizeof(vertice*)*(n_vertices));
       for(i=0;i<n_vertices;i++) vertices[i] = NULL;
 
     }
@@ -85,26 +95,28 @@ int main (int argc, char** argv){
       vertice* new_vertice2;
       edge* new_edge;
 
-      fscanf(gr,"%d", &temp_i1);
+      u=fscanf(gr,"%d", &temp_i1);
+			temp_i1--;
 
       new_vertice1 = create_vertice(temp_i1);
       vertices[temp_i1] = new_vertice1;
    
-      fscanf(gr,"%d", &temp_i2);
+      u=fscanf(gr,"%d", &temp_i2);
+			temp_i2--;
      
       new_vertice2 = create_vertice(temp_i2);
       vertices[temp_i2] = new_vertice2;
 
-      fscanf(gr,"%lf", &temp_d);
+      u=fscanf(gr,"%lf", &temp_d);
 
       new_edge = create_edge(vertices[temp_i1]->id,vertices[temp_i2]->id,temp_d);
       add_edge(vertices[temp_i1],vertices[temp_i2],new_edge);
 
       //Ignoramos a próxima
-		  fscanf(gr,"%s", buffer);
-      fscanf(gr,"%d", &temp_i1);
-      fscanf(gr,"%d", &temp_i2);
-      fscanf(gr,"%lf", &temp_d);
+		  u=fscanf(gr,"%s", buffer);
+      u=fscanf(gr,"%d", &temp_i1);
+      u=fscanf(gr,"%d", &temp_i2);
+      u=fscanf(gr,"%lf", &temp_d);
 
       break;
     }
@@ -117,9 +129,10 @@ int main (int argc, char** argv){
     edge* new_edge;
 
     //Lê o 'a'
-    fscanf(gr,"%s", buffer);
+    u=fscanf(gr,"%s", buffer);
 
-    fscanf(gr,"%d", &temp_i1);
+    u=fscanf(gr,"%d", &temp_i1);
+		temp_i1--;
 
     if(vertices[temp_i1] == NULL){
       //printf("null1\n");
@@ -127,7 +140,8 @@ int main (int argc, char** argv){
       vertices[temp_i1] = new_vertice1;
     }
 
-    fscanf(gr,"%d", &temp_i2);
+    u=fscanf(gr,"%d", &temp_i2);
+		temp_i2--;
 
     if(vertices[temp_i2] == NULL){
       //printf("null2\n");
@@ -135,7 +149,7 @@ int main (int argc, char** argv){
       vertices[temp_i2] = new_vertice2;
     }
 
-    fscanf(gr,"%lf", &temp_d);
+    u=fscanf(gr,"%lf", &temp_d);
 
     //printf("gr3: %lf | %d | %d\n\n\n\n",temp_d,vertices[temp_i1]->id,vertices[temp_i2]->id);
     new_edge = create_edge(vertices[temp_i1]->id,vertices[temp_i2]->id,temp_d);
@@ -143,14 +157,52 @@ int main (int argc, char** argv){
     add_edge(vertices[temp_i1],vertices[temp_i2],new_edge);
 
     //Ignoramos próxima linha pois será repetição da linha anterior
-    fscanf(gr,"%s", buffer);
-    fscanf(gr,"%d", &temp_i1);
-    fscanf(gr,"%d", &temp_i2);
-    fscanf(gr,"%lf", &temp_d);
+    u=fscanf(gr,"%s", buffer);
+    u=fscanf(gr,"%d", &temp_i1);
+    u=fscanf(gr,"%d", &temp_i2);
+    u=fscanf(gr,"%lf", &temp_d);
   }
   
   fclose(gr);
+	
+	//Criamos o grafo para mandar para o algorítimo de dijkstra
+	graph g;
+	g.nv = n_vertices;
+	g.ne = n_edges;
+	g.vertices = vertices;
+	
+	/*int* a = (int*)malloc(sizeof(int)*g.nv);
+	int* finished = (int*)malloc(sizeof(int)*g.nv);
+	double* d = (double*)malloc(sizeof(double)*g.nv);
+	bin_node** tracker = (bin_node**)malloc(sizeof(bin_node*)*g.nv);
 
+	bin_heap* heap = create_heap_bin(g.nv);
+	for(i=0;i<g.nv;i++){
+	a[i] = i;
+	finished[i] = 0;
+
+	bin_node* new = create_node_bin(g.vertices[i]->id);
+	tracker[i] = new;
+	insert_bin(heap,new);
+	
+	d[i] = DBL_MAX;
+	}*/
+	
+	/*printf("%lf\n",d[0]);
+	decreace_key_bin(heap,2,10);
+	decreace_key_bin(heap,5,15);
+	decreace_key_bin(heap,1000,5);
+	bin_node* min = extract_min_bin(heap);
+	printf("\n%d | %d | %lf",min->index,min->id,min->key);
+	min = extract_min_bin(heap);
+	printf("\n%d | %d | %lf",min->index,min->id,min->key);
+	min = extract_min_bin(heap);
+	printf("\n%d | %d | %lf",min->index,min->id,min->key);
+	decreace_key_bin(heap,264342,0);
+	min = extract_min_bin(heap);
+	printf("\n%d | %d | %lf",min->index,min->id,min->key);
+	*/
+	
 	//print de teste
 	//print_vertices(vertices,n_vertices);
   
@@ -160,6 +212,27 @@ int main (int argc, char** argv){
   * !!!
   */
 
+	//Executamos dijkstra e medimos o tempo levado
+	ans ans;
+	clock_t t = clock();
+	if(choice == 1) ans = dijkstra_bin(g,0);
+	else ans = dijkstra_fib(g,0);
+	t = clock() - t;
+	double tempo = ((double)t)/CLOCKS_PER_SEC;
+
+	printf("Dijkstra executado em %lf segundos.\n",tempo);
+
+	//Escrevemos arquivo de resultado
+	char res[124];
+  strcpy(res,argv[1]);
+  strcat(res,"_result.txt");
+	FILE* resultado = fopen(res,"a");
+  
+  for(i = 0; i < n_vertices; i++){
+    fprintf(resultado,"Distância( %d ): %d\tAntecessor( %d ): %d\n",i, (int)ans.d[i],i,ans.a[i]);
+  }
+  fclose(resultado);
+	
 	//TESTE PARA A FIBONACCI HEAP
 	/*fib_heap* heap = create_heap();
 	fib_node** nodes =(fib_node**)malloc(sizeof(fib_node*)*n_vertices);
