@@ -13,11 +13,13 @@
 #include "binheap.h"
 #include "graph.h"
 #include "dijkstra.h"
+#include "hashmap.h"
+#include "state.h"
 
 //Argumento 1 = Arquivo
 //Argumento 2 = Binário (1) ou fibonacci (2)
 int main (int argc, char** argv){
-  
+
   //Verifica se o número de argumentos está correto
   if(argc < 2){
    printf("ERRO: NÚMERO DE ARGUMENTOS ESTÁ ERRADO!\n");
@@ -32,23 +34,23 @@ int main (int argc, char** argv){
   //Variável contadora
   int i = 0;
 	int u = 0;
-  
+
   //Variáveis que obteremos do arquivo
   char type[1024];
   int n_vertices = -1;
   int n_edges = -1;
-  
-  
+
+
  /*
-  * 
+  *
   * COMEÇO DA LEITURA !!!
-  * 
+  *
   */
- 
+
   //Abrindo arquivo tsp
   FILE* gr;
   gr = fopen(argv[1],"r");
-  
+
   //Se não achar o arquivo ou falhar entra aqui
   if(gr == NULL){
    printf("\nERRO: ARQUIVO NULO, VERIFIQUE SE O CAMINHO ESTÁ CORRETO!\n");
@@ -60,20 +62,20 @@ int main (int argc, char** argv){
   int temp_i1;
   int temp_i2;
   double temp_d;
-  
+
   //Declaração do array de vertices que sera inicializado durante leitura
   vertice** vertices;
- 
+
   /*
   int read;
   while(fgets(buffer, 1024, tsp)){
-    
+
     printf("BUFFER: %s\n",buffer);
   }*/
 
   //printf("Lendo... %s %d\n",argv[1],fscanf(tsp,"%s", buffer));
   //printf("aii %s\n",buffer);
-  
+
   //Pegamos o nome
   while(fscanf(gr,"%s", buffer)){
     if(strcmp(buffer,"p") == 0){
@@ -83,7 +85,7 @@ int main (int argc, char** argv){
       printf("Vertices and Edges: %d | %d\n", n_vertices, n_edges);
 
       //Agora que sabemos quantos vertices inicializamos o array de vertices
-      //+1 é para contar a possibilidade de começar em 0 ou 1, não fara diferença 
+      //+1 é para contar a possibilidade de começar em 0 ou 1, não fara diferença
       vertices = (vertice**)malloc(sizeof(vertice*)*(n_vertices));
       for(i=0;i<n_vertices;i++) vertices[i] = NULL;
 
@@ -100,10 +102,10 @@ int main (int argc, char** argv){
 
       new_vertice1 = create_vertice(temp_i1);
       vertices[temp_i1] = new_vertice1;
-   
+
       u=fscanf(gr,"%d", &temp_i2);
 			temp_i2--;
-     
+
       new_vertice2 = create_vertice(temp_i2);
       vertices[temp_i2] = new_vertice2;
 
@@ -120,7 +122,7 @@ int main (int argc, char** argv){
 
       break;
     }
-  }  
+  }
 
   //Lemos as arestas. O /2 é pois cada aresta aparece 2x uma seguida da outra e o -1 é pois já lemos a primeira antes.
   for(i=0;i<((n_edges/2)-1);i++){
@@ -162,15 +164,15 @@ int main (int argc, char** argv){
     u=fscanf(gr,"%d", &temp_i2);
     u=fscanf(gr,"%lf", &temp_d);
   }
-  
+
   fclose(gr);
-	
+
 	//Criamos o grafo para mandar para o algorítimo de dijkstra
 	graph g;
 	g.nv = n_vertices;
 	g.ne = n_edges;
 	g.vertices = vertices;
-	
+
 	/*int* a = (int*)malloc(sizeof(int)*g.nv);
 	int* finished = (int*)malloc(sizeof(int)*g.nv);
 	double* d = (double*)malloc(sizeof(double)*g.nv);
@@ -184,10 +186,10 @@ int main (int argc, char** argv){
 	bin_node* new = create_node_bin(g.vertices[i]->id);
 	tracker[i] = new;
 	insert_bin(heap,new);
-	
+
 	d[i] = DBL_MAX;
 	}*/
-	
+
 	/*printf("%lf\n",d[0]);
 	decreace_key_bin(heap,2,10);
 	decreace_key_bin(heap,5,15);
@@ -202,10 +204,10 @@ int main (int argc, char** argv){
 	min = extract_min_bin(heap);
 	printf("\n%d | %d | %lf",min->index,min->id,min->key);
 	*/
-	
+
 	//print de teste
 	//print_vertices(vertices,n_vertices);
-  
+
  /*
   * !!!
   * FIM DA LEITURA !!!
@@ -227,12 +229,12 @@ int main (int argc, char** argv){
   strcpy(res,argv[1]);
   strcat(res,"_result.txt");
 	FILE* resultado = fopen(res,"a");
-  
+
   for(i = 0; i < n_vertices; i++){
     fprintf(resultado,"Distância( %d ): %d\tAntecessor( %d ): %d\n",i, (int)ans.d[i],i,ans.a[i]);
   }
   fclose(resultado);
-	
+
 	//TESTE PARA A FIBONACCI HEAP
 	/*fib_heap* heap = create_heap();
 	fib_node** nodes =(fib_node**)malloc(sizeof(fib_node*)*n_vertices);
@@ -253,7 +255,7 @@ int main (int argc, char** argv){
 	printf("|%d|\n",x->id);
 	x = extract_min(heap);
 	printf("|%d|\n",x->id);
-	
+
 	fib_node* temp = heap->min;
 	x = temp;*/
 	/*do{
@@ -262,9 +264,9 @@ int main (int argc, char** argv){
 		if(x->child != NULL && x->child->right->id != x->child->id)printf("|||%d|||\n",x->child->right->id);
 		x = x->right;
 	}while(x->id != temp->id);*/
-	
+
 
   printf("WE DID IT\n\n\n\n");
   return 0;
-  
+
 }
