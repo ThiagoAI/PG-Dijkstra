@@ -22,7 +22,8 @@ typedef struct hash_struct{
 //Função hash para state
 int hash(state a);
 hashmap* create_hashmap(int size);
-void add_hashmap(hashmap* h,state a,cellinfo b);
+void hashmap_add(hashmap* h,state a,cellinfo b);
 hashitem* hashmap_get(hashmap* h,state a);
+void hashmap_clear(hashmap* h);
 
 #endif

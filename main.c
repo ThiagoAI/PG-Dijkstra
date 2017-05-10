@@ -12,13 +12,60 @@
 #include "fibheap.h"
 #include "binheap.h"
 #include "graph.h"
-#include "dijkstra.h"
 #include "hashmap.h"
 #include "state.h"
 
 //Argumento 1 = Arquivo
 //Argumento 2 = Binário (1) ou fibonacci (2)
 int main (int argc, char** argv){
+
+  hashmap* h = create_hashmap(256);
+
+  double k[2] = {100,100};
+  state a = create_state(1,1,k);
+  cellinfo b = create_info();
+  b.rhs = 10;
+  hashmap_add(h,a,b);
+
+  double l[2] = {130,130};
+  state c = create_state(1,2,l);
+  cellinfo d = create_info();
+  d.rhs = 11;
+  hashmap_add(h,c,d);
+
+  double m[2] = {0,0};
+  state e = create_state(1,3,m);
+  cellinfo f = create_info();
+  f.rhs = 15;
+  hashmap_add(h,e,f);
+
+  hashitem* x = hashmap_get(h,a);
+  printf("OI %lf\n",x->info.rhs);
+  x = hashmap_get(h,c);
+  printf("IA %lf\n",x->info.rhs);
+  x = hashmap_get(h,e);
+  printf("IA %lf\n",x->info.rhs);
+
+  hashmap_clear(h);
+
+  x = hashmap_get(h,e);
+  if(x == NULL) printf("PIRANHA\n");
+  else printf("IA %lf\n",x->info.rhs);
+
+  bin_heap* bin = create_heap_bin(256);
+  push(bin,a);
+  push(bin,c);
+  push(bin,e);
+
+  state test = pop(bin);
+  printf("EI %d | %d\n",test.x,test.y);
+  test = pop(bin);
+  printf("EI %d | %d\n",test.x,test.y);
+  test = pop(bin);
+  printf("EI %d | %d\n",test.x,test.y);
+  push(bin,a);
+
+  return 0;
 
   //Verifica se o número de argumentos está correto
   if(argc < 2){
@@ -215,10 +262,10 @@ int main (int argc, char** argv){
   */
 
 	//Executamos dijkstra e medimos o tempo levado
-	ans ans;
+	//ans ans;
 	clock_t t = clock();
-	if(choice == 1) ans = dijkstra_bin(g,0);
-	else ans = dijkstra_fib(g,0);
+	//if(choice == 1) ans = dijkstra_bin(g,0);
+	//else ans = dijkstra_fib(g,0);
 	t = clock() - t;
 	double tempo = ((double)t)/CLOCKS_PER_SEC;
 
@@ -231,7 +278,7 @@ int main (int argc, char** argv){
 	FILE* resultado = fopen(res,"a");
 
   for(i = 0; i < n_vertices; i++){
-    fprintf(resultado,"Distância( %d ): %d\tAntecessor( %d ): %d\n",i, (int)ans.d[i],i,ans.a[i]);
+    //fprintf(resultado,"Distância( %d ): %d\tAntecessor( %d ): %d\n",i, (int)ans.d[i],i,ans.a[i]);
   }
   fclose(resultado);
 

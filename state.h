@@ -15,6 +15,9 @@ typedef struct cellinfo_struct{
   double cost;
 }cellinfo;
 
+//Cria state
+state create_state(int x,int y,double* k);
+
 //Para criar uma cellinfo vazia
 cellinfo create_info();
 

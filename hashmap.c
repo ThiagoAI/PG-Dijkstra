@@ -1,5 +1,5 @@
 #include <stdlib.h>
-
+#include <stdio.h>
 #include "hashmap.h"
 
 //Função hash para state
@@ -17,11 +17,11 @@ hashmap* create_hashmap(int size){
 }
 
 //adiciona cellinfo b com chave a no hashmap
-void add_hashmap(hashmap* h,state a,cellinfo b){
+void hashmap_add(hashmap* h,state a,cellinfo b){
   hashitem* item = (hashitem*)malloc(sizeof(hashitem));
   item->key = a;
   item->info = b;
-  int i = hash(a);
+  int i = hash(a) % h->size;
 
   hashitem* temp = h->bucket[i];
   item->next = temp;
@@ -31,7 +31,7 @@ void add_hashmap(hashmap* h,state a,cellinfo b){
 
 //Pega hashitem da hash dada a chave a
 hashitem* hashmap_get(hashmap* h,state a){
-  int i = hash(a);
+  int i = hash(a) % h->size;
   hashitem* item;
 
   for(item = h->bucket[i];item != NULL;item = item->next){
@@ -49,10 +49,8 @@ void hashmap_clear(hashmap* h){
   hashitem* temp;
   hashitem* temp2;
 
-  for(i=0;i<h->size || h->count == 0;i++){
-
+  for(i=0;i<h->size;i++){
     if(h->bucket[i] != NULL){
-
       temp = h->bucket[i];
       while(temp != NULL){
 
@@ -61,7 +59,7 @@ void hashmap_clear(hashmap* h){
         temp = temp2;
         h->count--;
       }//while
-
+      h->bucket[i] = NULL;
     }//if
 
   }//for

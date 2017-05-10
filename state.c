@@ -2,6 +2,15 @@
 
 #include "state.h"
 
+state create_state(int x,int y,double* k){
+  state a;
+  a.x = x;
+  a.y = y;
+  a.k[0] = k[0];
+  a.k[1] = k[1];
+  return a;
+}
+
 cellinfo create_info(){
   cellinfo info;
   info.g = 0;
