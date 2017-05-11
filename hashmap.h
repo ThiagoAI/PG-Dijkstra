@@ -23,7 +23,7 @@ typedef struct hash_struct{
 int hash(state a);
 hashmap* create_hashmap(int size);
 void hashmap_add(hashmap* h,state a,cellinfo b);
-hashitem* hashmap_get(hashmap* h,state a);
+cellinfo hashmap_get(hashmap* h,state a);
 void hashmap_clear(hashmap* h);
 
 #endif

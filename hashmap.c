@@ -29,14 +29,14 @@ void hashmap_add(hashmap* h,state a,cellinfo b){
   h->count++;
 }
 
-//Pega hashitem da hash dada a chave a
-hashitem* hashmap_get(hashmap* h,state a){
+//Pega cellinfo da hash dada a chave a
+cellinfo hashmap_get(hashmap* h,state a){
   int i = hash(a) % h->size;
   hashitem* item;
 
   for(item = h->bucket[i];item != NULL;item = item->next){
     if(eq_states(item->key,a))
-      return item;
+      return item->info;
   }
 
   //se não achar retorna nulo

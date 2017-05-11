@@ -1,11 +1,15 @@
 #ifndef LIST_H_
 #define LIST_H_
-#include "edge.h"
+
+#include "state.h"
 
 //Nodo da lista de arestas
 typedef struct node_list{
   struct node_list* next;
-  edge* edge;
-}edge_list;
+  state* s;
+}state_list;
+
+void clear_list(state_list l);
+void add_list(state_list l,state a);
 
 #endif

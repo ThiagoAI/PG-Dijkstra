@@ -3,39 +3,21 @@
 
 #include "list.h"
 
-
-/*int get_point(int_list* list,int i){
-  if(i >= list->amount) return -10;
-  
-  city* temp = list->cities;
-  int k = 0;
-  
-  for(k = 0; k < i; k++){
-  temp = temp->next;  
-  }
-  
-  return temp->point;
+//Adiciona a lista
+state_list* add_list(state_list* l,state a){
+  state_list* n = (state_list*)malloc(sizeof(state_list));
+  n->s = &a;
+  n->next = l;
+  return n;
 }
 
-void print_list(int_list* list){
-  printf("Quantidade: %d\n",list->amount);
-  city* temp = list->cities;
-  while(temp != NULL){
-    printf("|%d\n",temp->point);
-    temp = temp->next;
+//Zera a lista
+void clear_list(state_list* l){
+  state_list* temp1;
+  state_list* temp2;
+  temp2 = l;
+  for(temp1 = l;temp1 != NULL;temp1 = temp2){
+    temp2 = temp1->next;
+    free(temp1);
   }
-
 }
-
-int_list* destroy_list(int_list* list){
- city* temp = list->cities;
-  while(temp != NULL){
-    city* temp2 = temp->next;
-    free(temp);
-    temp = temp2;
-  }
-  
-  free(list);
-  return NULL;
-}*/
-
