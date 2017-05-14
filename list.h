@@ -9,7 +9,7 @@ typedef struct node_list{
   state* s;
 }state_list;
 
-void clear_list(state_list l);
-void add_list(state_list l,state a);
+void clear_list(state_list* l);
+void add_list(state_list* l,state a);
 
 #endif

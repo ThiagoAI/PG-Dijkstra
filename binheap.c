@@ -16,7 +16,7 @@ bin_heap* create_heap_bin(int size){
 	bin_heap* bin = (bin_heap*)malloc(sizeof(bin_heap));
   bin->size = size;
 	bin->n = 0;
-  bin->heap = (state*)malloc(sizeof(state)*size);
+  bin->heap = (state**)malloc(sizeof(state*)*size);
   return bin;
 }
 
@@ -49,34 +49,32 @@ void push(bin_heap* heap,state a){
 	//Se passar do tamanho máxmo temos que aumentar
 	if(heap->n + 1 >= heap->size){
 		heap->size = heap->size*2;
-		heap->heap = (state*)realloc(heap->heap,heap->size*sizeof(state));
+		heap->heap = (state**)realloc(heap->heap,heap->size*sizeof(state*));
 	}
 
 //Percorremos do último nível tentando chegar a raiz para achar o lugar o certo
 	int i = heap->n + 1;
 	int j = i/2;
-	while(i > 1 && gt_states(heap->heap[j],a)){
+	while(i > 1 && gt_states(*heap->heap[j],a)){
 		heap->heap[i] = heap->heap[j];
 		i = j;
 		j = j/2;
 	}
-	heap->heap[i] = a;
+	heap->heap[i] = &a;
 	heap->n++;
 }
 
-state pop(bin_heap* heap){
+state* pop(bin_heap* heap){
 
 	//Se estiver vazia saimos
-	double key[2] = {0,0};
-	state b = create_state(0,0,key);
-	if(!heap->n) return b;
+	if(!heap->n) return NULL;
 
 	int i = 1;
 	int j;
 	int k;
 
 	//O mínimo
-	state a = heap->heap[1];
+	state* a = heap->heap[1];
 	heap->heap[1] = heap->heap[heap->n];
 	heap->n--;
 
@@ -86,10 +84,10 @@ state pop(bin_heap* heap){
 		k = i;
 		j = 2 * i;
 
-		if( j <= heap->n && lt_states(heap->heap[j],heap->heap[k])){
+		if( j <= heap->n && lt_states(*heap->heap[j],*heap->heap[k])){
 			k = j;
 		}
-		if(j + 1 <= heap->n && lt_states(heap->heap[j+1],heap->heap[k])){
+		if(j + 1 <= heap->n && lt_states(*heap->heap[j+1],*heap->heap[k])){
 			k = j+1;
 		}
 
@@ -98,6 +96,13 @@ state pop(bin_heap* heap){
 	heap->heap[i] = heap->heap[heap->n+1];
 
 	return a;
+}
+
+//Limpa todos os elementos da heap
+void clear_heap(bin_heap* heap){
+	heap->n = 0;
+	int i = 0;
+	for(i=0;i<heap->size;i++) heap->heap[i] = NULL;
 }
 //Função auxiliar de extract_min para manter suas propriedades após extração
 /*void min_heapify(bin_heap* heap,int x){

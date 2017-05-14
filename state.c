@@ -28,6 +28,11 @@ int eq_states(state a,state b){
   else return 0;
 }
 
+//Verifica se é diferente
+int neq_states(state a,state b){
+  return ((a.x != b.x) || (a.y != b.y));
+}
+
 //greater than
 int gt_states(state a,state b){
   if(a.k[0]-0.000001 > b.k[0]) return 1;

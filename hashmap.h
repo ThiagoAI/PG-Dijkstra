@@ -5,11 +5,15 @@
 
 //HASHMAP USANDO STATE COMO CHAVE E CELLINFO COMO VALOR GUARDADO
 
+//TODO fazer o open_h certo
+
 //itens do hashmap
 typedef struct hashitem_struct{
   struct hashitem_struct* next;
   state key;
   cellinfo info;
+  //Apenas para open_h
+  double sum;
 }hashitem;
 
 //hashmap em si
@@ -22,8 +26,8 @@ typedef struct hash_struct{
 //Função hash para state
 int hash(state a);
 hashmap* create_hashmap(int size);
-void hashmap_add(hashmap* h,state a,cellinfo b);
-cellinfo hashmap_get(hashmap* h,state a);
+void hashmap_add(hashmap* h,state a,cellinfo b,double d);
+hashitem* hashmap_get(hashmap* h,state a);
 void hashmap_clear(hashmap* h);
 
 #endif

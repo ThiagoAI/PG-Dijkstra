@@ -16,12 +16,13 @@ typedef struct bin_heapstruct{
 	//Tamanho máximo
 	int size;
   //Vetor com os nodos da heap
-  state* heap;
+  state** heap;
 }bin_heap;
 
 bin_heap* create_heap_bin(int size);
 void push(bin_heap* heap,state a);
-state pop(bin_heap* heap);
+state* pop(bin_heap* heap);
+void clear_heap(bin_heap* heap);
 /*bin_heap* create_heap_bin(int size);
 state create_node_bin(state a);
 void insert_bin(bin_heap* heap,state node);

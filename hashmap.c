@@ -7,6 +7,11 @@ int hash(state a){
   return a.x + a.y*12289;
 }
 
+//Para a openHash, chave usando a key para que possamos comparar com um state que foi updated
+double key_hash(state a){
+  return a.k[0] + a.k[1]*1193;
+}
+
 //Cria o hashmap
 hashmap* create_hashmap(int size){
   hashmap* h = (hashmap*) malloc (sizeof(hashmap));
@@ -17,10 +22,11 @@ hashmap* create_hashmap(int size){
 }
 
 //adiciona cellinfo b com chave a no hashmap
-void hashmap_add(hashmap* h,state a,cellinfo b){
+void hashmap_add(hashmap* h,state a,cellinfo b,double d){
   hashitem* item = (hashitem*)malloc(sizeof(hashitem));
   item->key = a;
   item->info = b;
+  item->sum = d;
   int i = hash(a) % h->size;
 
   hashitem* temp = h->bucket[i];
@@ -29,14 +35,14 @@ void hashmap_add(hashmap* h,state a,cellinfo b){
   h->count++;
 }
 
-//Pega cellinfo da hash dada a chave a
-cellinfo hashmap_get(hashmap* h,state a){
+//Pega hashitem da hash dada a chave a
+hashitem* hashmap_get(hashmap* h,state a){
   int i = hash(a) % h->size;
   hashitem* item;
 
   for(item = h->bucket[i];item != NULL;item = item->next){
     if(eq_states(item->key,a))
-      return item->info;
+      return item;
   }
 
   //se não achar retorna nulo

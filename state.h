@@ -24,8 +24,11 @@ cellinfo create_info();
 //Temos de comparar de forma lexcográfica
 //Usaremos 0.000001 para "forçar" a comparação lexicográfica (no caso deles serem iguais)
 
-//Verificar se é igual
+//equal
 int eq_states(state a,state b);
+
+//not equal
+int neq_states(state a,state b);
 
 //greater than
 int gt_states(state a,state b);
