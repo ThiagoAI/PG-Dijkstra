@@ -26,7 +26,7 @@ typedef struct hash_struct{
 //Função hash para state (usa x e y)
 int hash(state a);
 //Função hash para key (usa k)
-int key_hash(state a);
+double key_hash(state a);
 
 hashmap* create_hashmap(int size);
 void hashmap_add(hashmap* h,state a,cellinfo b,double d);

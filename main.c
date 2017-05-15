@@ -88,6 +88,27 @@ int main (int argc, char** argv){
     i = temp->s;
     printf("L3L %d %d %lf\n",i->x,i->y,i->k[0]);
   }
+
+  hashmap* h2 = create_hashmap(1024);
+  hashmap* open_h = create_hashmap(256);
+  bin_heap* open_list = create_heap_bin(1024);
+  state_list* path = NULL;
+
+  start.x = 1;
+  start.y = 1;
+
+  goal.x = 10;
+  goal.y = 10;
+
+  path = replan(path,h2,open_h,open_list);
+
+  state_list* lel = path;
+  state* xx;
+  for(lel = path;lel != NULL;lel = lel->next){
+    xx = lel->s;
+    printf("%d - %d |%lf |%lf\n\n",xx->x,xx->y,xx->k[0],xx->k[1]);
+  }
+
   return 0;
 
   //Verifica se o número de argumentos está correto

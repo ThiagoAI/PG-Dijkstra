@@ -18,9 +18,6 @@
 
 //Variável global do algoritmo
 double k_m = 0;
-state goal;
-state start;
-state last;
 
 //Número máximo de passos (para se estiver cercado de obstáculos não rodar pra sempre)
 int max_steps = 10000;
@@ -229,6 +226,16 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
   double csum;
 
   a = calculate_key(h,a);
+  csum = key_hash(a);
+  cellinfo temp = create_info();
+  temp.cost = C1;
+
+  //TODO DEVERIA NAO ESTAR COMENTADO
+  //hashitem* cur = hashmap_get(open_h,a);
+  //if(cur != NULL && close(csum,cur->key.k[1])) return;
+
+  hashmap_add(open_h,a,temp,csum);
+  push(open_list,a);
 }
 
 /*
@@ -239,8 +246,19 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
   * F3 - FUNÇÕES DE UPDATE
   */
 
+  //Função que "move o robo", não força um replan devido ao k_m
+  void update_start(int a,int b,hashmap* h){
+    start.x = a;
+    start.y = b;
+
+    k_m += heuristic(last,start);
+
+    start = calculate_key(h,start);
+    last = start;
+  }
+
   //Função do pseudocódigo do algoritmo, atualiza valores do vértice
-  void update_vertex(state a,hashmap* h){
+  void update_vertex(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
     state_list* s;
 
     //Enquanto não chegarmos no objetivo...
@@ -260,9 +278,25 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
       if(!close(get_rhs(a,h),temp)) set_rhs(a,temp,h);
     }
 
+    if(!close(get_rhs(a,h),get_rhs(a,h))) insert(a,h,open_h,open_list);
     clear_list(&s);
   }
 
+  //Atualza valor de uma cell (para fazê-la um obstáculo por exemplo)
+  void update_cell(int a,int b, double val,hashmap* h,hashmap* open_h,bin_heap* open_list){
+    state u;
+    u.x = a;
+    u.y = b;
+    u.k[0] = 0;
+    u.k[1] = 0;
+
+    if (eq_states(start,u) || eq_states(goal,u)) return;
+
+    make_new_cell(u,h);
+    hashitem* i = hashmap_get(h,u);
+    i->info.cost = val;
+    update_vertex(u,h,open_h,open_list);
+  }
 
   /*
    * FIM DAS FUNÇÕES DE UPDATE
@@ -271,10 +305,41 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
    /*
     * FUNÇÕES PRINCIPAIS
     */
+    //Inicializa nosso algoritmo
+    void init(hashmap* h,hashmap* open_h,bin_heap* open_list,state_list* path,int sx,int sy,int gx,int gy){
+      //Limpamos as estruturas de dados
+      clear_heap(open_list);
+      clear_list(&path);
+      hashmap_clear(h);
+      hashmap_clear(open_h);
 
+      //zeramos km
+      k_m = 0;
+
+      //Atualizamos valores passados para o state inicial e o objetivo
+      start.x = sx;
+      start.y = sy;
+      goal.x = gx;
+      goal.y = gy;
+
+      //Inserimos eles na cellhash
+      cellinfo temp = create_info();
+      temp.cost = C1;
+
+      hashmap_add(h,goal,temp,-1);
+      //temp = create_info();
+      double d = heuristic(start,goal);
+      temp.g = d;
+      temp.rhs = d;
+      temp.cost = C1;
+
+      hashmap_add(h,start,temp,-1);
+      start = calculate_key(h,start);
+      last = start;
+    }
 
 //Acha o menor caminho
-int compute_shortest_path(bin_heap* open_list,hashmap* h,hashmap* open_h){
+int compute_shortest_path(hashmap* h,hashmap* open_h,bin_heap* open_list){
   state_list* s = NULL;
 
   //Se não há nada na openlist, não tem o que mexer
@@ -318,51 +383,46 @@ int compute_shortest_path(bin_heap* open_list,hashmap* h,hashmap* open_h){
     if(lt_states(k_old,calculate_key(h,u))){
       insert(u,h,open_h,open_list);
     }
+    else if(get_g(u,h) > get_rhs(u,h)){ //Houve melhora
+      set_g(u,get_rhs(u,h),h);
+      s = get_pred(u,h);
+      state_list* l;
+      state* i;
 
-  }
-}
+      for(l = s;l != NULL;l = l->next){
+        i = l->s;
+        update_vertex(*i,h,open_h,open_list);
+      }
+      //TODO Falta um update(u) aqui?
+    }
+    else{ //Houve piora
+      set_g(u,DBL_MAX,h);
+      s = get_pred(u,h);
+      state_list* l;
+      state* i;
 
-//Inicializa nosso algoritmo
-void init(hashmap* h,hashmap* open_h,bin_heap* open_list,state_list* path,int sx,int sy,int gx,int gy){
-  //Limpamos as estruturas de dados
-  clear_heap(open_list);
-  clear_list(&path);
-  hashmap_clear(h);
-  hashmap_clear(open_h);
+      for(l = s;l != NULL;l = l->next){
+        i = l->s;
+        update_vertex(*i,h,open_h,open_list);
+      }
+        update_vertex(u,h,open_h,open_list);
+    }
 
-  //zeramos km
-  k_m = 0;
+    clear_list(&s);
+  } //while
 
-  //Atualizamos valores passados para o state inicial e o objetivo
-  start.x = sx;
-  start.y = sy;
-  goal.x = gx;
-  goal.y = gy;
-
-  //Inserimos eles na cellhash
-  cellinfo temp = create_info();
-  temp.cost = C1;
-
-  hashmap_add(h,goal,temp,-1);
-  //temp = create_info();
-  double d = heuristic(start,goal);
-  temp.g = d;
-  temp.rhs = d;
-  temp.cost = C1;
-
-  hashmap_add(h,start,temp,-1);
-  start = calculate_key(h,start);
-  last = start;
+  return 0;
 }
 
 //Replaneja o caminho (list)
-int replan(state_list* list,hashmap* h,bin_heap* open_list){
+//É nossa função principal
+state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_list){
 
   //Zeramos o caminho
   clear_list(&list);
 
   //Encontramos o menor caminho para o objetivo e agimos apropriadamente
-  int res = compute_shortest_path(open_list,h);
+  int res = compute_shortest_path(h,open_h,open_list);
 
   //Se não há caminho...
   if(res < 0){
@@ -379,7 +439,9 @@ int replan(state_list* list,hashmap* h,bin_heap* open_list){
     return FALSE;
   }
 
-  while(neq_states(start,goal)){
+  printf("t1\n");
+
+  while(neq_states(cur,goal)){
     //TODO falta algo no n aqui?
     add_list(&list,cur);
     n = get_succ(cur);
@@ -389,7 +451,7 @@ int replan(state_list* list,hashmap* h,bin_heap* open_list){
       printf("ERRO 3: Nao ha caminho para o objetivo\n");
       return FALSE;
     }
-
+    //printf("t2: %d %d %d %d\n",);
     double cmin = DBL_MAX;
     double tmin = 0;
     state smin;
@@ -423,5 +485,5 @@ int replan(state_list* list,hashmap* h,bin_heap* open_list){
     cur = smin;
   }//while neq
   add_list(&list,goal);
-  return TRUE;
+  return list;
 }
