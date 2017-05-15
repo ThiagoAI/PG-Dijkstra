@@ -22,6 +22,25 @@ state goal;
 state start;
 state last;
 
+//Número máximo de passos (para se estiver cercado de obstáculos não rodar pra sempre)
+int max_steps = 10000;
+
+//Foward declarations
+double get_rhs(state a,hashmap* h);
+double get_g(state a,hashmap* h);
+
+/* INDEX
+ * F1 - FUNÇÕES MATEMÁTICAS
+ * F2 - FUNÇÕES DE UTILIDADE
+ * F3 - FUNÇÕES UPDATE
+ * F4 - FUNÇÕES PRINCIPAIS
+ * F5 - FUNÇÕES DE DESENHO
+ */
+
+/*
+ * F1 - FUNÇÕES MATEMÁTICAS (DE DISTÂNCIA E BOOLEANAS SIMPLES)
+ */
+
 //Verifica se dois double estão a 10^-5 de distância
 int close(double x, double y){
   if(x == DBL_MAX && y == DBL_MAX) return TRUE;
@@ -73,6 +92,109 @@ double heuristic(state a,state b){
   return eight_condist(a,b)*C1;
 }
 
+//Calcula o valor da tupla de uma chave
+state calculate_key(hashmap* h,state a){
+  //TEM QUE USAR O GET RHS E GET G
+  //cellinfo c = hashmap_get(h,a);
+  double v = fmin(get_rhs(a,h),get_g(a,h));
+
+    //TODO CHECAR SE É START MESMO
+    a.k[0] = v + heuristic(a,start) + k_m;
+    a.k[1] = v;
+
+    return a;
+}
+
+/*
+ * FIM DE FUNÇÕES MATEMÁTICAS
+ */
+
+ /*
+  * F2 - FUNÇÕES DE UTILIDADE COMO AS "GET"
+  */
+
+  //Checa se o state está na hash, se não adiciona
+  void make_new_cell(state a,hashmap* h){
+
+    //Se já estiver lá não faz nada
+    if(hashmap_get(h,a) != NULL) return;
+
+    cellinfo x;
+    double heu = heuristic(a,goal);
+    x.rhs = heu;
+    x.g = heu;
+    x.cost = C1;
+    hashmap_add(h,a,x,-1);
+  }
+
+  //Muda valor de rhs na cellhash
+  void set_rhs(state a,double r,hashmap* h){
+    make_new_cell(a,h);
+    hashitem* i = hashmap_get(h,a);
+    i->info.rhs = r;
+  }
+
+  //Muda valor de rhs na cellhash
+  void set_g(state a,double r,hashmap* h){
+    make_new_cell(a,h);
+    hashitem* i = hashmap_get(h,a);
+    i->info.g = r;
+  }
+
+  //Pega os sucessores de um state (todos os 8 vizinhos no caso 8-way)
+  state_list* get_succ(state a){
+    state_list* l = NULL;
+
+    a.k[0] = -1;
+    a.k[1] = -1;
+
+    a.x += 1;
+    add_list(&l,a);
+    a.y += 1;
+    add_list(&l,a);
+    a.x -= 1;
+    add_list(&l,a);
+    a.x -= 1;
+    add_list(&l,a);
+    a.y -= 1;
+    add_list(&l,a);
+    a.y -= 1;
+    add_list(&l,a);
+    a.x += 1;
+    add_list(&l,a);
+    a.x += 1;
+    add_list(&l,a);
+
+    return l;
+  }
+
+  //Pega os predecessores de um state (todos os 8 vizinhos MENOS OS OCUPADOS)
+  state_list* get_pred(state a,hashmap* h){
+    state_list* l = NULL;
+
+    a.k[0] = -1;
+    a.k[1] = -1;
+
+    a.x += 1;
+    if(!occupied(a,h)) add_list(&l,a);
+    a.y += 1;
+    if(!occupied(a,h)) add_list(&l,a);
+    a.x -= 1;
+    if(!occupied(a,h)) add_list(&l,a);
+    a.x -= 1;
+    if(!occupied(a,h)) add_list(&l,a);
+    a.y -= 1;
+    if(!occupied(a,h)) add_list(&l,a);
+    a.y -= 1;
+    if(!occupied(a,h)) add_list(&l,a);
+    a.x += 1;
+    if(!occupied(a,h)) add_list(&l,a);
+    a.x += 1;
+    if(!occupied(a,h)) add_list(&l,a);
+
+    return l;
+  }
+
 //Pega o RHS tratando dos casos especiais
 double get_rhs(state a,hashmap* h){
   //Se for o objetivo, é 0 por definição
@@ -94,24 +216,117 @@ double get_g(state a,hashmap* h){
   return temp->info.rhs;
 }
 
-//Calcula o valor da tupla de uma chave
-state calculate_key(hashmap* h,state a){
-  //TEM QUE USAR O GET RHS E GET G
-  //cellinfo c = hashmap_get(h,a);
-  double v = fmin(get_rhs(a,h),get_g(a,h));
+//Verifica se o state passado está na openlist vendo se ele está na openHash
+int is_valid(state a,hashmap* open_h){
+  hashitem* i = hashmap_get(open_h,a);
+  if(i == NULL) return FALSE;
+  if(!close(key_hash(a),i->sum)) return FALSE;
+  return TRUE;
+}
 
-    //TODO CHECAR SE É START MESMO
-    a.k[0] = v + heuristic(a,start) + k_m;
-    a.k[1] = v;
+//Insere state passado na openlist e openHash
+void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
+  double csum;
 
-    return a;
+  a = calculate_key(h,a);
+}
+
+/*
+ * FIM DAS FUNÇÕES DE UTILIDADE
+ */
+
+ /*
+  * F3 - FUNÇÕES DE UPDATE
+  */
+
+  //Função do pseudocódigo do algoritmo, atualiza valores do vértice
+  void update_vertex(state a,hashmap* h){
+    state_list* s;
+
+    //Enquanto não chegarmos no objetivo...
+    if(neq_states(a,goal)){
+      s = get_succ(a);
+      double temp = DBL_MAX;
+      double temp2;
+      state* i;
+      state_list* e;
+
+      for(e = s;e != NULL;e = e->next){
+        i = e->s;
+
+        temp2 = get_g(*i,h) + cost(a,*i,h);
+        if(temp2 < temp) temp = temp2;
+      }
+      if(!close(get_rhs(a,h),temp)) set_rhs(a,temp,h);
+    }
+
+    clear_list(&s);
+  }
+
+
+  /*
+   * FIM DAS FUNÇÕES DE UPDATE
+   */
+
+   /*
+    * FUNÇÕES PRINCIPAIS
+    */
+
+
+//Acha o menor caminho
+int compute_shortest_path(bin_heap* open_list,hashmap* h,hashmap* open_h){
+  state_list* s = NULL;
+
+  //Se não há nada na openlist, não tem o que mexer
+  if(open_list->n == 0) return 1;
+
+  int k = 0;
+
+  //TODO checar se condição do while está realmente correta
+  //Enquanto a openlist não estiver vazia E o topo da open_list for menor que start OU start não for mais consistente
+  while((!open_list->n != 0) &&
+        (lt_states(*peek(open_list),start = calculate_key(h,start)))
+        || (get_rhs(start,h) != get_g(start,h))){
+
+    if(k++ > max_steps){
+      printf("Limite de passos atingido\n");
+      return -1;
+    }
+
+    state u;
+
+    //Testa se start é consistente
+    int test = (get_rhs(start,h) != get_g(start,h));
+
+    //Removemos de forma preguiçosa (vai removendo até ficar vazio ou achar um bom)
+    while(TRUE){
+      //Se a openlist for vazia retornamos 1
+      if(open_list->n == 0) return 1;
+      u = *pop(open_list);
+
+      //Se o elemento na open_list não for valido, executamos o loop de novo
+      if(!is_valid(u,h)) continue;
+      //Se u não for menor que start e start é consistente, retornamos 2
+      if((!lt_states(u,start)) && (!test)) return 2;
+      break;
+    }
+
+    hashmap_remove(open_h,u);
+    state k_old = u;
+
+    //Se estiver desatualizado...
+    if(lt_states(k_old,calculate_key(h,u))){
+      insert(u,h,open_h,open_list);
+    }
+
+  }
 }
 
 //Inicializa nosso algoritmo
-void init(hashmap* h,hashmap* open_h,bin_heap* heap,state_list* path,int sx,int sy,int gx,int gy){
+void init(hashmap* h,hashmap* open_h,bin_heap* open_list,state_list* path,int sx,int sy,int gx,int gy){
   //Limpamos as estruturas de dados
-  clear_heap(heap);
-  clear_list(path);
+  clear_heap(open_list);
+  clear_list(&path);
   hashmap_clear(h);
   hashmap_clear(open_h);
 
@@ -140,14 +355,14 @@ void init(hashmap* h,hashmap* open_h,bin_heap* heap,state_list* path,int sx,int 
   last = start;
 }
 
-
-int replan(state_list* list,hashmap* h){
+//Replaneja o caminho (list)
+int replan(state_list* list,hashmap* h,bin_heap* open_list){
 
   //Zeramos o caminho
-  clear_list(list);
+  clear_list(&list);
 
   //Encontramos o menor caminho para o objetivo e agimos apropriadamente
-  int res = compute_shortest_path();
+  int res = compute_shortest_path(open_list,h);
 
   //Se não há caminho...
   if(res < 0){
@@ -166,7 +381,7 @@ int replan(state_list* list,hashmap* h){
 
   while(neq_states(start,goal)){
     //TODO falta algo no n aqui?
-    add_list(list,cur);
+    add_list(&list,cur);
     n = get_succ(cur);
 
     //Se a lista está vazia...
@@ -179,9 +394,11 @@ int replan(state_list* list,hashmap* h){
     double tmin = 0;
     state smin;
     state* i;
+    state_list* e = n;
 
     //Percorremos a lista de sucessores
-    for(i = n->s;i != NULL;i = n->next->s){
+    for(e = n;e != NULL;e = e->next){
+      i = e->s;
       double val = cost(cur,*i,h);
       double val2 = true_dist(*i,goal) + true_dist(*i,start);
       val += get_g(*i,h);
@@ -202,9 +419,9 @@ int replan(state_list* list,hashmap* h){
     }//for
 
     //TODO VER SE CUR = SMIN É DE FATO CORRETO
-    clear_list(n);
+    clear_list(&n);
     cur = smin;
   }//while neq
-  add_list(list,goal);
+  add_list(&list,goal);
   return TRUE;
 }

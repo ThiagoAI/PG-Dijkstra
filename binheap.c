@@ -16,7 +16,7 @@ bin_heap* create_heap_bin(int size){
 	bin_heap* bin = (bin_heap*)malloc(sizeof(bin_heap));
   bin->size = size;
 	bin->n = 0;
-  bin->heap = (state**)malloc(sizeof(state*)*size);
+  bin->heap = (state**)calloc(size,sizeof(state*));
   return bin;
 }
 
@@ -42,6 +42,14 @@ int right(int index){
 	return (2 * index + 1);
 }*/
 
+//Pega mas não remove o elemento no topo da heap
+state* peek(bin_heap* heap){
+		if(heap == NULL || !heap->n ) return NULL;
+
+		state* k = heap->heap[1];
+		return k;
+}
+
 //Insere na heap
 void push(bin_heap* heap,state a){
 	//bin_node* bin = create_node_bin(a);
@@ -52,6 +60,13 @@ void push(bin_heap* heap,state a){
 		heap->heap = (state**)realloc(heap->heap,heap->size*sizeof(state*));
 	}
 
+	//Criamos a cópia
+	state* temp = (state*)malloc(sizeof(state));
+	temp->x = a.x;
+  temp->y = a.y;
+  temp->k[0] = a.k[0];
+  temp->k[1] = a.k[1];
+
 //Percorremos do último nível tentando chegar a raiz para achar o lugar o certo
 	int i = heap->n + 1;
 	int j = i/2;
@@ -60,7 +75,7 @@ void push(bin_heap* heap,state a){
 		i = j;
 		j = j/2;
 	}
-	heap->heap[i] = &a;
+	heap->heap[i] = temp;
 	heap->n++;
 }
 
@@ -102,8 +117,15 @@ state* pop(bin_heap* heap){
 void clear_heap(bin_heap* heap){
 	heap->n = 0;
 	int i = 0;
-	for(i=0;i<heap->size;i++) heap->heap[i] = NULL;
+	for(i=0;i<heap->size;i++){
+		if(heap->heap[i] != NULL){
+			free(heap->heap[i]);
+			heap->heap[i] = NULL;
+		}
+	}
 }
+
+
 //Função auxiliar de extract_min para manter suas propriedades após extração
 /*void min_heapify(bin_heap* heap,int x){
 	int l = left(x);

@@ -6,14 +6,11 @@
 #include <unistd.h>
 #include <float.h>
 
-#include "edge.h"
-#include "vertice.h"
 #include "list.h"
-#include "fibheap.h"
 #include "binheap.h"
-#include "graph.h"
 #include "hashmap.h"
 #include "state.h"
+#include "dstarlite.h"
 
 //Argumento 1 = Arquivo
 //Argumento 2 = Binário (1) ou fibonacci (2)
@@ -25,19 +22,19 @@ int main (int argc, char** argv){
   state a = create_state(1,1,k);
   cellinfo b = create_info();
   b.rhs = 10;
-  hashmap_add(h,a,b);
+  hashmap_add(h,a,b,-1);
 
   double l[2] = {130,130};
   state c = create_state(1,2,l);
   cellinfo d = create_info();
   d.rhs = 11;
-  hashmap_add(h,c,d);
+  hashmap_add(h,c,d,-1);
 
   double m[2] = {0,0};
   state e = create_state(1,3,m);
   cellinfo f = create_info();
   f.rhs = 15;
-  hashmap_add(h,e,f);
+  hashmap_add(h,e,f,-1);
 
   hashitem* x = hashmap_get(h,a);
   printf("OI %lf\n",x->info.rhs);
@@ -45,6 +42,11 @@ int main (int argc, char** argv){
   printf("IA %lf\n",x->info.rhs);
   x = hashmap_get(h,e);
   printf("IA %lf\n",x->info.rhs);
+
+  set_rhs(e,400.5,h);
+
+  x = hashmap_get(h,e);
+  printf("LOL %lf\n",x->info.rhs);
 
   hashmap_clear(h);
 
@@ -57,18 +59,39 @@ int main (int argc, char** argv){
   push(bin,c);
   push(bin,e);
 
-  state test = pop(bin);
+  state test = *pop(bin);
   printf("EI %d | %d\n",test.x,test.y);
-  test = pop(bin);
+  test = *pop(bin);
   printf("EI %d | %d\n",test.x,test.y);
-  test = pop(bin);
+  test = *pop(bin);
   printf("EI %d | %d\n",test.x,test.y);
   push(bin,a);
 
+  clear_heap(bin);
+  test = *pop(bin);
+  if(&test == NULL) printf("THIS IS HALLOWEEN\n");
+
+
+  state_list* list = NULL;
+  add_list(&list,a);
+  add_list(&list,c);
+  add_list(&list,e);
+
+  state_list* temp = list;
+  state* i;
+  for(temp = list;temp != NULL;temp = temp->next){
+    i = temp->s;
+    printf("L3L %d %d %lf\n",i->x,i->y,i->k[0]);
+  }
+  clear_list(&list);
+  for(temp = list;temp != NULL;temp = temp->next){
+    i = temp->s;
+    printf("L3L %d %d %lf\n",i->x,i->y,i->k[0]);
+  }
   return 0;
 
   //Verifica se o número de argumentos está correto
-  if(argc < 2){
+  /*if(argc < 2){
    printf("ERRO: NÚMERO DE ARGUMENTOS ESTÁ ERRADO!\n");
    return 1;
   }
@@ -85,7 +108,7 @@ int main (int argc, char** argv){
   //Variáveis que obteremos do arquivo
   char type[1024];
   int n_vertices = -1;
-  int n_edges = -1;
+  int n_edges = -1;*/
 
 
  /*
@@ -95,7 +118,7 @@ int main (int argc, char** argv){
   */
 
   //Abrindo arquivo tsp
-  FILE* gr;
+  /*FILE* gr;
   gr = fopen(argv[1],"r");
 
   //Se não achar o arquivo ou falhar entra aqui
@@ -111,7 +134,7 @@ int main (int argc, char** argv){
   double temp_d;
 
   //Declaração do array de vertices que sera inicializado durante leitura
-  vertice** vertices;
+  vertice** vertices;*/
 
   /*
   int read;
@@ -124,7 +147,7 @@ int main (int argc, char** argv){
   //printf("aii %s\n",buffer);
 
   //Pegamos o nome
-  while(fscanf(gr,"%s", buffer)){
+  /*while(fscanf(gr,"%s", buffer)){
     if(strcmp(buffer,"p") == 0){
       u=fscanf(gr,"%s", type);
       u=fscanf(gr,"%d", &n_vertices);
@@ -218,7 +241,7 @@ int main (int argc, char** argv){
 	graph g;
 	g.nv = n_vertices;
 	g.ne = n_edges;
-	g.vertices = vertices;
+	g.vertices = vertices;*/
 
 	/*int* a = (int*)malloc(sizeof(int)*g.nv);
 	int* finished = (int*)malloc(sizeof(int)*g.nv);
@@ -263,7 +286,7 @@ int main (int argc, char** argv){
 
 	//Executamos dijkstra e medimos o tempo levado
 	//ans ans;
-	clock_t t = clock();
+	/*clock_t t = clock();
 	//if(choice == 1) ans = dijkstra_bin(g,0);
 	//else ans = dijkstra_fib(g,0);
 	t = clock() - t;
@@ -280,7 +303,7 @@ int main (int argc, char** argv){
   for(i = 0; i < n_vertices; i++){
     //fprintf(resultado,"Distância( %d ): %d\tAntecessor( %d ): %d\n",i, (int)ans.d[i],i,ans.a[i]);
   }
-  fclose(resultado);
+  fclose(resultado);*/
 
 	//TESTE PARA A FIBONACCI HEAP
 	/*fib_heap* heap = create_heap();

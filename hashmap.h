@@ -23,11 +23,15 @@ typedef struct hash_struct{
   int count;
 }hashmap;
 
-//Função hash para state
+//Função hash para state (usa x e y)
 int hash(state a);
+//Função hash para key (usa k)
+int key_hash(state a);
+
 hashmap* create_hashmap(int size);
 void hashmap_add(hashmap* h,state a,cellinfo b,double d);
 hashitem* hashmap_get(hashmap* h,state a);
+void hashmap_remove(hashmap* h,state a);
 void hashmap_clear(hashmap* h);
 
 #endif

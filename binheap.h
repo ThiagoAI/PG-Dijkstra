@@ -20,6 +20,7 @@ typedef struct bin_heapstruct{
 }bin_heap;
 
 bin_heap* create_heap_bin(int size);
+state* peek(bin_heap* heap);
 void push(bin_heap* heap,state a);
 state* pop(bin_heap* heap);
 void clear_heap(bin_heap* heap);

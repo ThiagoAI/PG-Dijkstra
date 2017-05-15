@@ -7,7 +7,7 @@ int hash(state a){
   return a.x + a.y*12289;
 }
 
-//Para a openHash, chave usando a key para que possamos comparar com um state que foi updated
+//Para a openHash, é o valor guardado para q possamos saber se houve mudanças na openlist
 double key_hash(state a){
   return a.k[0] + a.k[1]*1193;
 }
@@ -47,6 +47,36 @@ hashitem* hashmap_get(hashmap* h,state a){
 
   //se não achar retorna nulo
   return NULL;
+}
+
+//Remove do hashmap o item de chave a e o retorna
+void hashmap_remove(hashmap* h,state a){
+  int i = hash(a) % h->size;
+
+  hashitem* item = h->bucket[i];
+  hashitem* next;
+
+  if(item == NULL) return;
+
+  if(item->next == NULL){
+    free(item);
+    h->bucket[i] = NULL;
+    h->count--;
+    return;
+  }
+
+  while(item != NULL){
+    next = item->next;
+
+    if(next != NULL && eq_states(a,next->key)){
+      item->next = next->next;
+      h->count--;
+      free(next);
+      return;
+    }
+    item = next;
+  }
+
 }
 
 //limpa o hashmap, NÃO DESTRÓI ELE APENAS RETIRA TODOS OS ELEMENTOS
