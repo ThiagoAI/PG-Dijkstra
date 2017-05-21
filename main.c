@@ -104,7 +104,7 @@ int main (int argc, char** argv){
   //hashmap_print(open_h);
 
   //update_cell(2,2,-1,h,open_h,open_list);
-  path = replan(path,h,open_h,open_list);
+  //path = replan(path,h,open_h,open_list);
 
   printf("oi\n\n\n\n\n");
   update_cell(3,3,-1,h,open_h,open_list);

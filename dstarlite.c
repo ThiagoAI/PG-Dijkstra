@@ -282,9 +282,9 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
       state_list* e;
       //printf("top kek\n\n\n\n");
 
+      printf("seara q vai entrar no for?\n");
       for(e = s;e != NULL;e = e->next){
         i = e->s;
-
 
         //printf("top lul\n");
         //printf("%lf %lf//\n",get_g(*i,h),cost(a,*i,h));
@@ -294,7 +294,6 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
       }
 
       if(!close(get_rhs(a,h),temp)){
-        printf("setando rhs %lf\n",temp);
         set_rhs(a,temp,h);
       }
     }
@@ -323,6 +322,9 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
     i->info.cost = val;
     printf("update cell vertex\n\n");
     update_vertex(u,h,open_h,open_list);
+    hashitem* lol = hashmap_get(h,u);
+    if(lol == NULL) printf("NUUUUlo\n");
+    else printf("updatecell: %d %d| %.2lf | %.2lf\n",lol->key.x,lol->key.y,get_g(u,h),get_rhs(u,h));
     //hashitem* lol = hashmap_get(h,u);
     //printf("update cell %lf\n",lol->info.cost);
   }
@@ -387,9 +389,13 @@ int compute_shortest_path(hashmap* h,hashmap* open_h,bin_heap* open_list){
 
   //TODO checar se condição do while está realmente correta
   //Enquanto a openlist não estiver vazia E o topo da open_list for menor que start OU start não for mais consistente
-  while((open_list->n != 0) &&
+  state* xx = peek(open_list);
+  printf("|||| %d ||||",lt_states(*xx,start));
+  printf("shortest path ------ %d || %.2lf | %.2lf || %.2lf %.2lf\n",open_list->n,start.k[0],start.k[1],peek(open_list)->k[0],peek(open_list)->k[1]);
+  while((open_list->n != 0) && (
         (lt_states(*peek(open_list),start = calculate_key(h,start)))
-        || (get_rhs(start,h) != get_g(start,h))){
+        || (get_rhs(start,h) != get_g(start,h)))
+       ){
     printf("Entramos no loop...\n");
     if(k++ > max_steps){
       printf("Limite de passos atingido\n");
@@ -407,6 +413,9 @@ int compute_shortest_path(hashmap* h,hashmap* open_h,bin_heap* open_list){
       if(open_list->n == 0) return 1;
 
       u = pop(open_list);
+      if(u == NULL) printf("uh oh\n");
+      else printf("we popped: %d %d",u->x,u->y);
+
       if(u == NULL){
         printf("pop em CSP deu nulo\n");
         exit(0);
@@ -448,10 +457,10 @@ int compute_shortest_path(hashmap* h,hashmap* open_h,bin_heap* open_list){
 
       for(l = s;l != NULL;l = l->next){
         i = l->s;
-            printf("shoetest path 2 vertex\n\n");
+            printf("shortest path 2 vertex\n\n");
         update_vertex(*i,h,open_h,open_list);
       }
-      printf("shoetest path 3 vertex\n\n");
+      printf("shortest path 3 vertex\n\n");
         update_vertex(*u,h,open_h,open_list);
     }
 
@@ -508,12 +517,12 @@ state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_li
     for(e = n;e != NULL;e = e->next){
       i = e->s;
 
-      printf("info replan: %d %d %.2lf %.2lf\n",i->x,i->y,i->k[0],i->k[1]);
-      if(occupied(*i,h)) continue;
+      printf("info replan: x %d y %d \n",i->x,i->y);
+      //if(occupied(*i,h)) continue;
       double val = cost(cur,*i,h);
       double val2 = true_dist(*i,goal) + true_dist(start,*i);
       val += get_g(*i,h);
-      printf("info replan part 2: val %.4lf|val2 %.4lf|cost %.2lf g %.2lf\n",val,val2,cost(cur,*i,h),get_g(*i,h));
+      printf("info replan part 2: val - %.4lf|val2 - %.4lf|cost - %.2lf g - %.2lf\n",val,val2,cost(cur,*i,h),get_g(*i,h));
 
       //Se são iguais (considerando nossa margem de erro)
       if(close(val,cmin)){

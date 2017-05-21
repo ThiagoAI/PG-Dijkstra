@@ -52,7 +52,7 @@ int lte_states(state a,state b){
 //less than
 int lt_states(state a,state b){
   if(a.k[0] + 0.000001 < b.k[0]) return 1;
-  else if(a.k[0] - 0.000001 < b.k[0]) return 0;
+  else if(a.k[0] - 0.000001 > b.k[0]) return 0;
 
   return a.k[1] < b.k[1];
 }
