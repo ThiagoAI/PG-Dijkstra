@@ -31,7 +31,8 @@ double key_hash(state a);
 hashmap* create_hashmap(int size);
 void hashmap_add(hashmap* h,state a,cellinfo b,double d);
 hashitem* hashmap_get(hashmap* h,state a);
-void hashmap_remove(hashmap* h,state a);
-void hashmap_clear(hashmap* h);
+void hashmap_remove(hashmap** h,state a);
+void hashmap_clear(hashmap** h);
+void hashmap_print(hashmap* h);
 
 #endif

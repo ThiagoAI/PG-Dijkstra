@@ -16,9 +16,9 @@
 //Argumento 2 = Binário (1) ou fibonacci (2)
 int main (int argc, char** argv){
 
-  hashmap* h = create_hashmap(256);
+  //hashmap* h = create_hashmap(256);
 
-  double k[2] = {100,100};
+  /*double k[2] = {100,100};
   state a = create_state(1,1,k);
   cellinfo b = create_info();
   b.rhs = 10;
@@ -53,9 +53,10 @@ int main (int argc, char** argv){
   x = hashmap_get(h,e);
   if(x == NULL) printf("PIRANHA\n");
   else printf("IA %lf\n",x->info.rhs);
+  */
 
   bin_heap* bin = create_heap_bin(256);
-  push(bin,a);
+  /*push(bin,a);
   push(bin,c);
   push(bin,e);
 
@@ -71,9 +72,9 @@ int main (int argc, char** argv){
   test = *pop(bin);
   if(&test == NULL) printf("THIS IS HALLOWEEN\n");
 
-
+  */
   state_list* list = NULL;
-  add_list(&list,a);
+  /*add_list(&list,a);
   add_list(&list,c);
   add_list(&list,e);
 
@@ -87,20 +88,40 @@ int main (int argc, char** argv){
   for(temp = list;temp != NULL;temp = temp->next){
     i = temp->s;
     printf("L3L %d %d %lf\n",i->x,i->y,i->k[0]);
-  }
+  }*/
 
-  hashmap* h2 = create_hashmap(1024);
-  hashmap* open_h = create_hashmap(256);
+  hashmap* h = create_hashmap(1024);
+  hashmap* open_h = create_hashmap(1024);
   bin_heap* open_list = create_heap_bin(1024);
   state_list* path = NULL;
 
-  start.x = 1;
-  start.y = 1;
 
-  goal.x = 10;
-  goal.y = 10;
+  //Inicializamos o algoritmo
+  init(&h,&open_h,&open_list,&path,1,1,5,5);
+  printf("|%d|\n",h->count);
 
-  path = replan(path,h2,open_h,open_list);
+  hashmap_print(h);
+  //hashmap_print(open_h);
+
+  //update_cell(2,2,-1,h,open_h,open_list);
+  path = replan(path,h,open_h,open_list);
+
+  printf("oi\n\n\n\n\n");
+  update_cell(3,3,-1,h,open_h,open_list);
+  printf("ola\n\n\n\n\n");
+
+  //update_cell(2,1,-1,h,open_h,open_list);
+  //update_cell(2,2,-1,h,open_h,open_list);
+
+  path = replan(path,h,open_h,open_list);
+
+  update_cell(4,4,-1,h,open_h,open_list);
+  update_cell(4,5,-1,h,open_h,open_list);
+  update_cell(4,6,-1,h,open_h,open_list);
+
+  path = replan(path,h,open_h,open_list);
+
+  //BUG ALGORITMO DESCONSIDERA COST DAS CELLS INCLUINDO -1
 
   state_list* lel = path;
   state* xx;

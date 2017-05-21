@@ -16,6 +16,8 @@ double key_hash(state a){
 hashmap* create_hashmap(int size){
   hashmap* h = (hashmap*) malloc (sizeof(hashmap));
   h->bucket = (hashitem**)calloc(size,sizeof(hashitem*));
+  int i;
+  for(i=0;i<size;i++) h->bucket[i] = NULL;
   h->size = size;
   h->count = 0;
   return h;
@@ -23,12 +25,16 @@ hashmap* create_hashmap(int size){
 
 //adiciona cellinfo b com chave a no hashmap
 void hashmap_add(hashmap* h,state a,cellinfo b,double d){
+  if(a.x < 0 || a.y < 0){
+    printf("SHIT'S FUCKED UP INSERTION\n\n\n");
+    exit(0);
+  }
   hashitem* item = (hashitem*)malloc(sizeof(hashitem));
   item->key = a;
   item->info = b;
   item->sum = d;
-  int i = hash(a) % h->size;
-
+  int i = abs(hash(a) % h->size);
+  printf("colocando no hashmap %d %d |%lf\n",a.x,a.y,b.cost);
   hashitem* temp = h->bucket[i];
   item->next = temp;
   h->bucket[i] = item;
@@ -37,9 +43,12 @@ void hashmap_add(hashmap* h,state a,cellinfo b,double d){
 
 //Pega hashitem da hash dada a chave a
 hashitem* hashmap_get(hashmap* h,state a){
-  int i = hash(a) % h->size;
-  hashitem* item;
+  int i = abs(hash(a) % h->size);
 
+  hashitem* item = h->bucket[i];
+  if(item != NULL){
+    //printf("hashmap_get: %d %d %d %d %d\n",a.x,a.y,h->bucket[i] == NULL,item->key.x,item->key.y);
+  }
   for(item = h->bucket[i];item != NULL;item = item->next){
     if(eq_states(item->key,a))
       return item;
@@ -50,8 +59,9 @@ hashitem* hashmap_get(hashmap* h,state a){
 }
 
 //Remove do hashmap o item de chave a e o retorna
-void hashmap_remove(hashmap* h,state a){
-  int i = hash(a) % h->size;
+void hashmap_remove(hashmap** ha,state a){
+  hashmap* h = *ha;
+  int i = abs(hash(a) % h->size);
 
   hashitem* item = h->bucket[i];
   hashitem* next;
@@ -62,6 +72,7 @@ void hashmap_remove(hashmap* h,state a){
     free(item);
     h->bucket[i] = NULL;
     h->count--;
+    *ha = h;
     return;
   }
 
@@ -72,15 +83,18 @@ void hashmap_remove(hashmap* h,state a){
       item->next = next->next;
       h->count--;
       free(next);
+      *ha = h;
       return;
     }
     item = next;
   }
 
+  *ha = h;
 }
 
 //limpa o hashmap, NÃO DESTRÓI ELE APENAS RETIRA TODOS OS ELEMENTOS
-void hashmap_clear(hashmap* h){
+void hashmap_clear(hashmap** ha){
+  hashmap* h = *ha;
   int i = 0;
   hashitem* temp;
   hashitem* temp2;
@@ -100,4 +114,23 @@ void hashmap_clear(hashmap* h){
 
   }//for
 
+  *ha = h;
+}
+
+//Função para teste imprime conteudo do hashmap
+void hashmap_print(hashmap* h){
+  hashitem* temp;
+  int i = 0;
+  printf("||| ||| |||\n\n");
+  for(i = 0;i < h->size;i++){
+    temp = h->bucket[i];
+    if(temp != NULL){
+      printf("h: %.2lf |State: x %d y %d k0 %.2lf k1 %.2lf|Info: g %.2lf rhs %.2lf cost %.2lf|\n",temp->sum,temp->key.x,temp->key.y,temp->key.k[0],temp->key.k[1],temp->info.g,temp->info.rhs,temp->info.cost);
+      while(temp->next != NULL){
+        temp = temp->next;
+        printf("h: %.2lf |State: x %d y %d k0 %.2lf k1 %.2lf|Info: g %.2lf rhs %.2lf cost %.2lf|\n",temp->sum,temp->key.x,temp->key.y,temp->key.k[0],temp->key.k[1],temp->info.g,temp->info.rhs,temp->info.cost);
+        }
+    }
+  }
+  printf("||| ||| |||\n\n");
 }

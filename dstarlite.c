@@ -53,7 +53,11 @@ double cost(state a,state b,hashmap* h){
   if(xd + yd > 1) scale = M_SQRT2;
 
   hashitem* temp = hashmap_get(h,a);
-  if(temp == NULL) return scale*C1;
+  if(temp == NULL){
+    //printf("NULL LUL %lf\n",scale*C1);
+    return scale*C1;
+  }
+  //printf("LUL %d %d| %d %d| %lf\n",a.x,a.y,b.x,b.y,scale*temp->info.cost);
   return scale*temp->info.cost;
 }
 
@@ -80,7 +84,9 @@ double eight_condist(state a,state b){
 //Verifica se a cell está ocupada (cost < 0)
 int occupied(state a,hashmap* h){
   hashitem* temp = hashmap_get(h,a);
+
   if(temp == NULL) return FALSE;
+  //printf("OCUPADO %d %d | %d\n",a.x,a.y,temp->info.cost < 0);
   return temp->info.cost < 0;
 }
 
@@ -139,8 +145,10 @@ state calculate_key(hashmap* h,state a){
   }
 
   //Pega os sucessores de um state (todos os 8 vizinhos no caso 8-way)
-  state_list* get_succ(state a){
+  state_list* get_succ(state a,hashmap* h){
     state_list* l = NULL;
+
+    if(occupied(a,h)) return l;
 
     a.k[0] = -1;
     a.k[1] = -1;
@@ -207,10 +215,11 @@ double get_rhs(state a,hashmap* h){
 
 //Pega o g tratando dos casos especiais
 double get_g(state a,hashmap* h){
+  //printf("getting you g nigga\n");
   hashitem* temp = hashmap_get(h,a);
   if(temp == NULL)
     return heuristic(a,goal);
-  return temp->info.rhs;
+  return temp->info.g;
 }
 
 //Verifica se o state passado está na openlist vendo se ele está na openHash
@@ -235,7 +244,9 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
   //if(cur != NULL && close(csum,cur->key.k[1])) return;
 
   hashmap_add(open_h,a,temp,csum);
+  printf("PUXI\n\n");
   push(open_list,a);
+  printf("PUXI IS OVER\n");
 }
 
 /*
@@ -263,22 +274,37 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
 
     //Enquanto não chegarmos no objetivo...
     if(neq_states(a,goal)){
-      s = get_succ(a);
+      printf("update vertex %d %d\n",a.x,a.y);
+      s = get_succ(a,h);
       double temp = DBL_MAX;
       double temp2;
       state* i;
       state_list* e;
+      //printf("top kek\n\n\n\n");
 
       for(e = s;e != NULL;e = e->next){
         i = e->s;
 
+
+        //printf("top lul\n");
+        //printf("%lf %lf//\n",get_g(*i,h),cost(a,*i,h));
         temp2 = get_g(*i,h) + cost(a,*i,h);
+        //printf("muh seg faults\n");
         if(temp2 < temp) temp = temp2;
       }
-      if(!close(get_rhs(a,h),temp)) set_rhs(a,temp,h);
+
+      if(!close(get_rhs(a,h),temp)){
+        printf("setando rhs %lf\n",temp);
+        set_rhs(a,temp,h);
+      }
     }
 
-    if(!close(get_rhs(a,h),get_rhs(a,h))) insert(a,h,open_h,open_list);
+    //printf("%lf %lf|\n",get_g(a,h),get_rhs(a,h));
+    if(!close(get_g(a,h),get_rhs(a,h))){
+      printf("inserindo update vertex...\n");
+      insert(a,h,open_h,open_list);
+    }
+
     clear_list(&s);
   }
 
@@ -295,10 +321,13 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
     make_new_cell(u,h);
     hashitem* i = hashmap_get(h,u);
     i->info.cost = val;
+    printf("update cell vertex\n\n");
     update_vertex(u,h,open_h,open_list);
+    //hashitem* lol = hashmap_get(h,u);
+    //printf("update cell %lf\n",lol->info.cost);
   }
 
-  /*
+  /*x
    * FIM DAS FUNÇÕES DE UPDATE
    */
 
@@ -306,12 +335,16 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
     * FUNÇÕES PRINCIPAIS
     */
     //Inicializa nosso algoritmo
-    void init(hashmap* h,hashmap* open_h,bin_heap* open_list,state_list* path,int sx,int sy,int gx,int gy){
+    void init(hashmap** h2,hashmap** open_h2,bin_heap** open_list2,state_list** path2,int sx,int sy,int gx,int gy){
+      hashmap* h = *h2;
+      hashmap* open_h = *open_h2;
+      state_list* path = *path2;
+      bin_heap* open_list = *open_list2;
       //Limpamos as estruturas de dados
       clear_heap(open_list);
       clear_list(&path);
-      hashmap_clear(h);
-      hashmap_clear(open_h);
+      hashmap_clear(&h);
+      hashmap_clear(&open_h);
 
       //zeramos km
       k_m = 0;
@@ -336,6 +369,11 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
       hashmap_add(h,start,temp,-1);
       start = calculate_key(h,start);
       last = start;
+
+      *h2 = h;
+      *open_h2 = open_h;
+      *path2 = path;
+      *open_list2 = open_list;
     }
 
 //Acha o menor caminho
@@ -344,68 +382,77 @@ int compute_shortest_path(hashmap* h,hashmap* open_h,bin_heap* open_list){
 
   //Se não há nada na openlist, não tem o que mexer
   if(open_list->n == 0) return 1;
-
+  printf("SUVIVAH\n");
   int k = 0;
 
   //TODO checar se condição do while está realmente correta
   //Enquanto a openlist não estiver vazia E o topo da open_list for menor que start OU start não for mais consistente
-  while((!open_list->n != 0) &&
+  while((open_list->n != 0) &&
         (lt_states(*peek(open_list),start = calculate_key(h,start)))
         || (get_rhs(start,h) != get_g(start,h))){
-
+    printf("Entramos no loop...\n");
     if(k++ > max_steps){
       printf("Limite de passos atingido\n");
       return -1;
     }
 
-    state u;
+    state* u;
 
     //Testa se start é consistente
     int test = (get_rhs(start,h) != get_g(start,h));
-
+    printf("test deu: %d\n",test);
     //Removemos de forma preguiçosa (vai removendo até ficar vazio ou achar um bom)
     while(TRUE){
       //Se a openlist for vazia retornamos 1
       if(open_list->n == 0) return 1;
-      u = *pop(open_list);
 
+      u = pop(open_list);
+      if(u == NULL){
+        printf("pop em CSP deu nulo\n");
+        exit(0);
+      }
+      else printf("pop de CSP - %d %d\n",u->x,u->y);
+      //printf("Nosso u e %d %d |E valido - %d\n",u.x,u.y,(!is_valid(u,open_h)));
       //Se o elemento na open_list não for valido, executamos o loop de novo
-      if(!is_valid(u,h)) continue;
+      if(!is_valid(*u,open_h)) continue;
       //Se u não for menor que start e start é consistente, retornamos 2
-      if((!lt_states(u,start)) && (!test)) return 2;
+      if((!lt_states(*u,start)) && (!test)) return 2;
       break;
     }
 
-    hashmap_remove(open_h,u);
-    state k_old = u;
+    hashmap_remove(&open_h,*u);
+    state k_old = *u;
 
     //Se estiver desatualizado...
-    if(lt_states(k_old,calculate_key(h,u))){
-      insert(u,h,open_h,open_list);
+    if(lt_states(k_old,calculate_key(h,*u))){
+      insert(*u,h,open_h,open_list);
     }
-    else if(get_g(u,h) > get_rhs(u,h)){ //Houve melhora
-      set_g(u,get_rhs(u,h),h);
-      s = get_pred(u,h);
+    else if(get_g(*u,h) > get_rhs(*u,h)){ //Houve melhora
+      set_g(*u,get_rhs(*u,h),h);
+      s = get_pred(*u,h);
       state_list* l;
       state* i;
 
       for(l = s;l != NULL;l = l->next){
         i = l->s;
+        printf("shortest path vertex\n\n");
         update_vertex(*i,h,open_h,open_list);
       }
       //TODO Falta um update(u) aqui?
     }
     else{ //Houve piora
-      set_g(u,DBL_MAX,h);
-      s = get_pred(u,h);
+      set_g(*u,DBL_MAX,h);
+      s = get_pred(*u,h);
       state_list* l;
       state* i;
 
       for(l = s;l != NULL;l = l->next){
         i = l->s;
+            printf("shoetest path 2 vertex\n\n");
         update_vertex(*i,h,open_h,open_list);
       }
-        update_vertex(u,h,open_h,open_list);
+      printf("shoetest path 3 vertex\n\n");
+        update_vertex(*u,h,open_h,open_list);
     }
 
     clear_list(&s);
@@ -439,12 +486,11 @@ state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_li
     return FALSE;
   }
 
-  printf("t1\n");
-
   while(neq_states(cur,goal)){
+    printf("cur replan: %d %d\n",cur.x,cur.y);
     //TODO falta algo no n aqui?
     add_list(&list,cur);
-    n = get_succ(cur);
+    n = get_succ(cur,h);
 
     //Se a lista está vazia...
     if(n == NULL){
@@ -461,13 +507,19 @@ state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_li
     //Percorremos a lista de sucessores
     for(e = n;e != NULL;e = e->next){
       i = e->s;
+
+      printf("info replan: %d %d %.2lf %.2lf\n",i->x,i->y,i->k[0],i->k[1]);
+      if(occupied(*i,h)) continue;
       double val = cost(cur,*i,h);
-      double val2 = true_dist(*i,goal) + true_dist(*i,start);
+      double val2 = true_dist(*i,goal) + true_dist(start,*i);
       val += get_g(*i,h);
+      printf("info replan part 2: val %.4lf|val2 %.4lf|cost %.2lf g %.2lf\n",val,val2,cost(cur,*i,h),get_g(*i,h));
 
       //Se são iguais (considerando nossa margem de erro)
       if(close(val,cmin)){
+        printf("Too close to call\n");
         if(tmin > val2){
+          printf("val2 is best\n");
           tmin = val2;
           cmin = val;
           smin = *i;
@@ -480,7 +532,6 @@ state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_li
       }
     }//for
 
-    //TODO VER SE CUR = SMIN É DE FATO CORRETO
     clear_list(&n);
     cur = smin;
   }//while neq
