@@ -106,25 +106,25 @@ int main (int argc, char** argv){
   //update_cell(2,2,-1,h,open_h,open_list);
   //path = replan(path,h,open_h,open_list);
 
-  printf("oi\n\n\n\n\n");
   update_cell(3,3,-1,h,open_h,open_list);
-  printf("ola\n\n\n\n\n");
 
   //update_cell(2,1,-1,h,open_h,open_list);
   //update_cell(2,2,-1,h,open_h,open_list);
 
   path = replan(path,h,open_h,open_list);
 
+  update_cell(4,3,-1,h,open_h,open_list);
   update_cell(4,4,-1,h,open_h,open_list);
   update_cell(4,5,-1,h,open_h,open_list);
   update_cell(4,6,-1,h,open_h,open_list);
-
+  printf("VAI COMECAR O SEGUNDO REPLAN ! ! !\n\n\n\n\n");
   path = replan(path,h,open_h,open_list);
 
   //BUG ALGORITMO DESCONSIDERA COST DAS CELLS INCLUINDO -1
 
   state_list* lel = path;
   state* xx;
+  printf("\n\n");
   for(lel = path;lel != NULL;lel = lel->next){
     xx = lel->s;
     printf("%d - %d |%lf |%lf\n\n",xx->x,xx->y,xx->k[0],xx->k[1]);

@@ -24,18 +24,29 @@ hashmap* create_hashmap(int size){
 }
 
 //adiciona cellinfo b com chave a no hashmap
+//se a mesma chave já existe, atualiza o valor ao invés de colocar uma cópia
 void hashmap_add(hashmap* h,state a,cellinfo b,double d){
-  if(a.x < 0 || a.y < 0){
-    printf("SHIT'S FUCKED UP INSERTION\n\n\n");
-    exit(0);
+  int i = abs(hash(a) % h->size);
+  hashitem* temp = h->bucket[i];
+
+  //Se já existir no mapa atualiza o openHash ao invés de por de novo
+  while(temp != NULL){
+    if(eq_states(temp->key,a)){
+      temp->key = a;
+      temp->info = b;
+      temp->sum = d;
+      return;
+    }
+    temp = temp->next;
   }
+
+  //Se não tinha no mapa ainda chega aqui
   hashitem* item = (hashitem*)malloc(sizeof(hashitem));
   item->key = a;
   item->info = b;
   item->sum = d;
-  int i = abs(hash(a) % h->size);
-  printf("colocando no hashmap %d %d |%lf\n",a.x,a.y,b.cost);
-  hashitem* temp = h->bucket[i];
+
+  temp = h->bucket[i];
   item->next = temp;
   h->bucket[i] = item;
   h->count++;
@@ -46,36 +57,38 @@ hashitem* hashmap_get(hashmap* h,state a){
   int i = abs(hash(a) % h->size);
 
   hashitem* item = h->bucket[i];
-  if(item != NULL){
-    //printf("hashmap_get: %d %d %d %d %d\n",a.x,a.y,h->bucket[i] == NULL,item->key.x,item->key.y);
+  if(item == NULL){
+    return NULL;
   }
+
   for(item = h->bucket[i];item != NULL;item = item->next){
     if(eq_states(item->key,a))
       return item;
   }
-
   //se não achar retorna nulo
   return NULL;
 }
 
 //Remove do hashmap o item de chave a e o retorna
-void hashmap_remove(hashmap** ha,state a){
-  hashmap* h = *ha;
+void hashmap_remove(hashmap* h,state a){
   int i = abs(hash(a) % h->size);
-
   hashitem* item = h->bucket[i];
   hashitem* next;
 
-  if(item == NULL) return;
-
-  if(item->next == NULL){
-    free(item);
-    h->bucket[i] = NULL;
-    h->count--;
-    *ha = h;
+  if(item == NULL){
+    printf("HASHMAP NULL\n\n");
     return;
   }
 
+  //Se for o primeiro
+  if(eq_states(item->key,a)){
+    h->bucket[i] = item->next;
+    free(item);
+    h->count--;
+    return;
+  }
+
+  //Caso seja um dos next...
   while(item != NULL){
     next = item->next;
 
@@ -83,13 +96,11 @@ void hashmap_remove(hashmap** ha,state a){
       item->next = next->next;
       h->count--;
       free(next);
-      *ha = h;
       return;
     }
     item = next;
   }
 
-  *ha = h;
 }
 
 //limpa o hashmap, NÃO DESTRÓI ELE APENAS RETIRA TODOS OS ELEMENTOS

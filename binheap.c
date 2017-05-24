@@ -92,13 +92,13 @@ void swap(state** x,state** y){
 
 //Compara i com seus filhos, se um deles for menor, troca o menor com i e executa heapify no próximo nível da árvore
 void heapify(bin_heap* heap,int i){
-	int largest = 0;
+	//int largest = 0;
 	int smallest = (LCHILD(i) < heap->n && lt_states(*heap->heap[LCHILD(i)],*heap->heap[i])) ? LCHILD(i) : i;
 
-	if(smallest == LCHILD(i)) largest = i;
-	else largest = LCHILD(i);
+	//if(smallest == LCHILD(i)) largest = i;
+	//else largest = LCHILD(i);
 
-	if(RCHILD(i) < heap->n && lt_states(*heap->heap[RCHILD(i)],*heap->heap[largest])){
+	if(RCHILD(i) < heap->n && lt_states(*heap->heap[RCHILD(i)],*heap->heap[smallest])){
 		smallest = RCHILD(i);
 	}
 
@@ -118,8 +118,25 @@ state* pop(bin_heap* heap){
 	//O mínimo
 	state* a = heap->heap[0];
 	heap->heap[0] = heap->heap[heap->n - 1];
+	heap->heap[heap->n - 1] = NULL;
 	heap->n--;
 
+	/*if(a->x == 4 && a->y == 5){
+		state* x1 = heap->heap[0];
+		state* x2 = heap->heap[1];
+		state* x3 = heap->heap[2];
+		printf("WE HERE BOIS %d %d %.3lf %.3lf| %d %d %.3lf %.3lf| %d %d %.3lf %.3lf\n",x1->x,x1->y,x1->k[0],x1->k[1],x2->x,x2->y,x2->k[0],x2->k[1],x3->x,x3->y,x3->k[0],x3->k[1]);
+		printf("wut wat - %d\n",lt_states(*x2,*x1));
+		printf("wut wat - %d\n",lt_states(*x3,*x1));
+		heapify(heap,0);
+		 x1 = heap->heap[0];
+		 x2 = heap->heap[1];
+		 x3 = heap->heap[2];
+		printf("WE HERE BOIS %d %d %.3lf %.3lf| %d %d %.3lf %.3lf| %d %d %.3lf %.3lf\n",x1->x,x1->y,x1->k[0],x1->k[1],x2->x,x2->y,x2->k[0],x2->k[1],x3->x,x3->y,x3->k[0],x3->k[1]);
+		printf("wut wat - %d\n",lt_states(*x2,*x1));
+		printf("wut wat - %d\n",lt_states(*x3,*x1));
+		exit(0);
+	}*/
 	//Acerta heap
 	heapify(heap,0);
 
