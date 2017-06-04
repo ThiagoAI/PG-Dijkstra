@@ -279,7 +279,7 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
 
   //Função do pseudocódigo do algoritmo, atualiza valores do vértice
   void update_vertex(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
-    state_list* s;
+    state_list* s = NULL;
 
     //Enquanto não chegarmos no objetivo...
     if(neq_states(a,goal)){
@@ -311,6 +311,7 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
     //else{
       //printf("Nao deu update em 1 1.\n");
     //}
+
 
     clear_list(&s);
   }
@@ -344,7 +345,7 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
     //hashitem* lol = hashmap_get(h,u);
   }
 
-  /*x
+  /*
    * FIM DAS FUNÇÕES DE UPDATE
    */
 
@@ -401,7 +402,6 @@ int compute_shortest_path(hashmap* h,hashmap* open_h,bin_heap* open_list){
   if(open_list->n == 0) return 1;
   int k = 0;
 
-  //TODO checar se condição do while está realmente correta
   //Enquanto a openlist não estiver vazia E o topo da open_list for menor que start OU start não for mais consistente
 
   //printf("shortest path ------ %d || %.2lf | %.2lf || %.2lf %.2lf\n",open_list->n,start.k[0],start.k[1],peek(open_list)->k[0],peek(open_list)->k[1]);
@@ -495,10 +495,11 @@ int compute_shortest_path(hashmap* h,hashmap* open_h,bin_heap* open_list){
         i = l->s;
         printf("||%d %d||\n",i->x,i->y);
         update_vertex(*i,h,open_h,open_list);
+        printf("LEL\n\n");
       }
         update_vertex(*u,h,open_h,open_list);
     }
-    
+
     free(u);
     clear_list(&s);
     printf("WHILE END\n\n");

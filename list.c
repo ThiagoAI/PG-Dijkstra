@@ -23,6 +23,7 @@ state_list* add_list(state_list** l,state a){
 
 //Zera a lista
 void clear_list(state_list** l){
+  if(*l == NULL) return;
   state_list* temp1;
   state_list* temp2;
   for(temp1 = *l;temp1 != NULL;temp1 = temp2){

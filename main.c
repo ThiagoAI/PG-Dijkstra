@@ -97,7 +97,7 @@ int main (int argc, char** argv){
 
 
   //Inicializamos o algoritmo
-  init(&h,&open_h,&open_list,&path,1,1,5,5);
+  init(&h,&open_h,&open_list,&path,2,2,5,5);
   printf("|%d|\n",h->count);
 
   hashmap_print(h);
@@ -106,17 +106,31 @@ int main (int argc, char** argv){
   //update_cell(2,2,-1,h,open_h,open_list);
   //path = replan(path,h,open_h,open_list);
 
-  update_cell(3,3,-1,h,open_h,open_list);
+  //update_cell(3,3,-1,h,open_h,open_list);
 
   //update_cell(2,1,-1,h,open_h,open_list);
   //update_cell(2,2,-1,h,open_h,open_list);
 
-  path = replan(path,h,open_h,open_list);
+  //path = replan(path,h,open_h,open_list);
 
-  update_cell(4,3,-1,h,open_h,open_list);
+  update_cell(1,3,-1,h,open_h,open_list);
+  //update_cell(2,1,-1,h,open_h,open_list);
+  update_cell(2,3,-1,h,open_h,open_list);
+  update_cell(3,3,-1,h,open_h,open_list);
+  update_cell(3,2,-1,h,open_h,open_list);
+  update_cell(3,1,-1,h,open_h,open_list);
+  update_cell(1,1,-1,h,open_h,open_list);
+  update_cell(1,2,-1,h,open_h,open_list);
+
+  update_cell(4,6,-1,h,open_h,open_list);
+  //update_cell(2,1,-1,h,open_h,open_list);
+  update_cell(5,6,-1,h,open_h,open_list);
+  update_cell(6,5,-1,h,open_h,open_list);
+  update_cell(6,4,-1,h,open_h,open_list);
+  update_cell(5,4,-1,h,open_h,open_list);
   update_cell(4,4,-1,h,open_h,open_list);
   update_cell(4,5,-1,h,open_h,open_list);
-  update_cell(4,6,-1,h,open_h,open_list);
+
   printf("VAI COMECAR O SEGUNDO REPLAN ! ! !\n\n\n\n\n");
   path = replan(path,h,open_h,open_list);
 
