@@ -3,6 +3,11 @@
 #include <math.h> //Tem define M_SQRT2 que é a raiz quadrada de 2
 #include <float.h>
 
+//Open GL
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+
 #include "dstarlite.h"
 #include "hashmap.h"
 #include "state.h"
@@ -54,10 +59,10 @@ double cost(state a,state b,hashmap* h){
 
   hashitem* temp = hashmap_get(h,a);
   if(temp == NULL){
-    //printf("NULL LUL %lf\n",scale*C1);
+    ////printf("NULL LUL %lf\n",scale*C1);
     return scale*C1;
   }
-  //printf("LUL %d %d| %d %d| %lf\n",a.x,a.y,b.x,b.y,scale*temp->info.cost);
+  ////printf("LUL %d %d| %d %d| %lf\n",a.x,a.y,b.x,b.y,scale*temp->info.cost);
   return scale*temp->info.cost;
 }
 
@@ -86,7 +91,7 @@ int occupied(state a,hashmap* h){
   hashitem* temp = hashmap_get(h,a);
 
   if(temp == NULL) return FALSE;
-  //printf("OCUPADO %d %d | %d\n",a.x,a.y,temp->info.cost < 0);
+  ////printf("OCUPADO %d %d | %d\n",a.x,a.y,temp->info.cost < 0);
   return temp->info.cost < 0;
 }
 
@@ -118,10 +123,10 @@ state calculate_key(hashmap* h,state a){
 
   //Checa se o state está na hash, se não adiciona
   void make_new_cell(state a,hashmap* h){
-    printf("New cell %d %d\n",a.x,a.y);
+    //printf("New cell %d %d\n",a.x,a.y);
     //Se já estiver lá não faz nada
     if(hashmap_get(h,a) != NULL) return;
-    printf("New indeed\n");
+    //printf("New indeed\n");
     cellinfo x;
     double heu = heuristic(a,goal);
     x.rhs = heu;
@@ -143,7 +148,7 @@ state calculate_key(hashmap* h,state a){
     hashitem* i = hashmap_get(h,a);
     i->info.g = r;
     //hashitem* lol = hashmap_get(h,a);
-    //printf("set_g check: %lf | %lf\n",lol->info.g,r);
+    ////printf("set_g check: %lf | %lf\n",lol->info.g,r);
   }
 
   //Pega os sucessores de um state (todos os 8 vizinhos no caso 8-way)
@@ -225,10 +230,10 @@ double get_g(state a,hashmap* h){
 
 //Verifica se o state passado está na openlist vendo se ele está na openHash
 int is_valid(state a,hashmap* open_h){
-  printf("\nChecking %d %d validity.\n",a.x,a.y);
+  //printf("\nChecking %d %d validity.\n",a.x,a.y);
   hashitem* i = hashmap_get(open_h,a);
   if(i == NULL) return FALSE;
-  printf("Survive 1 - %.2lf %.2lf\n",key_hash(a),i->sum);
+  //printf("Survive 1 - %.2lf %.2lf\n",key_hash(a),i->sum);
   if(!close(key_hash(a),i->sum)) return FALSE;
   return TRUE;
 }
@@ -255,7 +260,7 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
 
   push(open_list,a);
 
-  printf("Tamanho da heap e %d\n",open_list->n);
+  //printf("Tamanho da heap e %d\n",open_list->n);
 }
 
 /*
@@ -283,7 +288,7 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
 
     //Enquanto não chegarmos no objetivo...
     if(neq_states(a,goal)){
-      //printf("update vertex %d %d\n",a.x,a.y);
+      ////printf("update vertex %d %d\n",a.x,a.y);
       s = get_succ(a,h);
       double temp = DBL_MAX;
       double temp2;
@@ -303,13 +308,13 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
       }
     }
 
-    //if(a.x == 1 && a.y == 1) printf("Update em 1 1: %.2lf | %.2lf\n",get_g(a,h),get_rhs(a,h));
+    //if(a.x == 1 && a.y == 1) //printf("Update em 1 1: %.2lf | %.2lf\n",get_g(a,h),get_rhs(a,h));
     if(!close(get_g(a,h),get_rhs(a,h))){
-      printf("Insert 1 | %d %d\n",a.x,a.y);
+      //printf("Insert 1 | %d %d\n",a.x,a.y);
       insert(a,h,open_h,open_list);
     }
     //else{
-      //printf("Nao deu update em 1 1.\n");
+      ////printf("Nao deu update em 1 1.\n");
     //}
 
 
@@ -332,17 +337,6 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
 
     update_vertex(u,h,open_h,open_list);
 
-    hashitem* lol = hashmap_get(h,u);
-    if(lol == NULL) printf("Null update cell\n");
-    else{
-      printf("updatecell: %d %d|",lol->key.x,lol->key.y);
-      if(get_g(u,h) == DBL_MAX) printf(" MAX |");
-      else printf("g %.2lf |",get_g(u,h));
-      if(get_rhs(u,h) == DBL_MAX) printf(" MAX |\n");
-      else printf("rhs %.2lf |\n",get_rhs(u,h));
-    }
-    printf("Tamanho da open_h: %d\n",open_h->count);
-    //hashitem* lol = hashmap_get(h,u);
   }
 
   /*
@@ -350,7 +344,7 @@ void insert(state a,hashmap* h,hashmap* open_h,bin_heap* open_list){
    */
 
    /*
-    * FUNÇÕES PRINCIPAIS
+    * F4 - FUNÇÕES PRINCIPAIS
     */
     //Inicializa nosso algoritmo
     void init(hashmap** h2,hashmap** open_h2,bin_heap** open_list2,state_list** path2,int sx,int sy,int gx,int gy){
@@ -404,15 +398,15 @@ int compute_shortest_path(hashmap* h,hashmap* open_h,bin_heap* open_list){
 
   //Enquanto a openlist não estiver vazia E o topo da open_list for menor que start OU start não for mais consistente
 
-  //printf("shortest path ------ %d || %.2lf | %.2lf || %.2lf %.2lf\n",open_list->n,start.k[0],start.k[1],peek(open_list)->k[0],peek(open_list)->k[1]);
+  ////printf("shortest path ------ %d || %.2lf | %.2lf || %.2lf %.2lf\n",open_list->n,start.k[0],start.k[1],peek(open_list)->k[0],peek(open_list)->k[1]);
   while((open_list->n != 0) && (
         (lt_states(*peek(open_list),start = calculate_key(h,start)))
         || (get_rhs(start,h) != get_g(start,h)))
        ){
-    printf("Start While: %.2lf %.2lf | %d\n",start.k[0],start.k[1],open_list->n);
+    //printf("Start While: %.2lf %.2lf | %d\n",start.k[0],start.k[1],open_list->n);
 
     if(k++ > max_steps){
-      printf("Limite de passos atingido\n");
+      //printf("Limite de passos atingido\n");
       return -1;
     }
 
@@ -427,51 +421,30 @@ int compute_shortest_path(hashmap* h,hashmap* open_h,bin_heap* open_list){
       if(open_list->n == 0) return 1;
 
       u = pop(open_list);
-      if(u == NULL) printf("uh oh\n");
-      else printf("we popped: %d %d\n",u->x,u->y);
-      state* ll = peek(open_list);
-      if(ll == NULL) printf("next is: NULL\n");
-      else printf("next is: %d %d",ll->x,ll->y);
-      //printf("lazy remove survive - %d %d %lf %lf",u->x,u->y,u->k[0],u->k[1]);
+
       //Se o elemento na open_list não for valido, executamos o loop de novo
-      //printf(" %d %d | %d\n",!is_valid(*u,open_h),(!lt_states(*u,start)) && (!test),hashmap_get(open_h,*u) == NULL);
       if(!is_valid(*u,open_h)) continue;
 
       //Se u não for menor que start e start é consistente, retornamos 2
       if((!lt_states(*u,start)) && (!test)) return 2;
-      printf("lazy remove survive - %d %d %lf %lf\n",u->x,u->y,u->k[0],u->k[1]);
+      //printf("lazy remove survive - %d %d %lf %lf\n",u->x,u->y,u->k[0],u->k[1]);
       break;
     }
 
-    printf("OpenHash size is: %d\n",open_h->count);
-    printf("Removendo %d %d\n",u->x,u->y);
+    //printf("OpenHash size is: %d\n",open_h->count);
+    //printf("Removendo %d %d\n",u->x,u->y);
     hashmap_remove(open_h,*u);
-    printf("OpenHash size after removal is: %d\n",open_h->count);
-
-    hashitem* xx = hashmap_get(open_h,*u);
-    if(xx == NULL) printf("IESS\n");
-    else{
-      printf("ERRO OPENHASH\n\n");
-      exit(0);
-    }
-
-    printf("-----------------------\n");
-    state* lul;
-    int i = 0;
-    for(i = 0; i < open_list->size;i++){
-      lul = open_list->heap[i];
-      if(lul != NULL) printf("State - %d %d | %lf %lf\n",lul->x,lul->y,lul->k[0],lul->k[1]);
-    }
+    //printf("OpenHash size after removal is: %d\n",open_h->count);
 
     state k_old = *u;
 
     //Se estiver desatualizado...
     if(lt_states(k_old,calculate_key(h,*u))){
-      printf("%d %d desatualizado!!!!!!!!!!.\n\n\n\n\n",u->x,u->y);
+      //printf("%d %d desatualizado!!!!!!!!!!.\n\n\n\n\n",u->x,u->y);
       insert(*u,h,open_h,open_list);
     }
     else if(get_g(*u,h) > get_rhs(*u,h)){ //Houve melhora
-      printf("Melhorou\n");
+      //printf("Melhorou\n");
       set_g(*u,get_rhs(*u,h),h);
       s = get_pred(*u,h);
       state_list* l;
@@ -479,13 +452,13 @@ int compute_shortest_path(hashmap* h,hashmap* open_h,bin_heap* open_list){
 
       for(l = s;l != NULL;l = l->next){
         i = l->s;
-        //printf("|%d %d|\n",i->x,i->y);
+        ////printf("|%d %d|\n",i->x,i->y);
         update_vertex(*i,h,open_h,open_list);
       }
 
     }
     else{ //Houve piora
-      printf("Piorou\n");
+      //printf("Piorou\n");
       set_g(*u,DBL_MAX,h);
       s = get_pred(*u,h);
       state_list* l;
@@ -493,16 +466,16 @@ int compute_shortest_path(hashmap* h,hashmap* open_h,bin_heap* open_list){
 
       for(l = s;l != NULL;l = l->next){
         i = l->s;
-        printf("||%d %d||\n",i->x,i->y);
+        //printf("||%d %d||\n",i->x,i->y);
         update_vertex(*i,h,open_h,open_list);
-        printf("LEL\n\n");
+        //printf("LEL\n\n");
       }
         update_vertex(*u,h,open_h,open_list);
     }
 
     free(u);
     clear_list(&s);
-    printf("WHILE END\n\n");
+    //printf("WHILE END\n\n");
   } //while
 
   return 0;
@@ -520,7 +493,7 @@ state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_li
 
   //Se não há caminho...
   if(res < 0){
-    printf("ERRO 1: Nao ha caminho para o objetivo\n");
+    //printf("ERRO 1: Nao ha caminho para o objetivo\n");
     return FALSE;
   }
 
@@ -529,22 +502,22 @@ state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_li
 
   //Se nosso g é infinito, também não há caminho
   if(get_g(start,h) == DBL_MAX){
-    printf("ERRO 2: Nao ha caminho para o objetivo\n");
+    //printf("ERRO 2: Nao ha caminho para o objetivo\n");
     return FALSE;
   }
 
   while(neq_states(cur,goal)){
-    //printf("cur replan: %d %d\n",cur.x,cur.y);
+    ////printf("cur replan: %d %d\n",cur.x,cur.y);
     //TODO falta algo no n aqui?
     add_list(&list,cur);
     n = get_succ(cur,h);
 
     //Se a lista está vazia...
     if(n == NULL){
-      printf("ERRO 3: Nao ha caminho para o objetivo\n");
+      //printf("ERRO 3: Nao ha caminho para o objetivo\n");
       return FALSE;
     }
-    //printf("t2: %d %d %d %d\n",);
+    ////printf("t2: %d %d %d %d\n",);
     double cmin = DBL_MAX;
     double tmin = 0;
     state smin;
@@ -555,14 +528,14 @@ state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_li
     for(e = n;e != NULL;e = e->next){
       i = e->s;
 
-      //printf("info replan: x %d y %d \n",i->x,i->y);
+      ////printf("info replan: x %d y %d \n",i->x,i->y);
       //if(occupied(*i,h)) continue;
       double val = cost(cur,*i,h);
       double val2 = true_dist(*i,goal) + true_dist(start,*i);
       val += get_g(*i,h);
-      //printf("info replan: %d %d|val2 - %.2lf|cost - %.2lf ",i->x,i->y,val2,cost(cur,*i,h));
-      //if(get_g(*i,h) == DBL_MAX) printf("g MAX\n");
-      //else printf("g %.2lf\n",get_g(*i,h));
+      ////printf("info replan: %d %d|val2 - %.2lf|cost - %.2lf ",i->x,i->y,val2,cost(cur,*i,h));
+      //if(get_g(*i,h) == DBL_MAX) //printf("g MAX\n");
+      //else //printf("g %.2lf\n",get_g(*i,h));
 
       //Se são iguais (considerando nossa margem de erro)
       if(close(val,cmin)){
@@ -586,3 +559,87 @@ state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_li
   add_list(&list,goal);
   return list;
 }
+
+/*
+ * FIM DAS FUNÇÕES PRINCIPAIS
+ */
+
+ /*
+  * F5 - FUNÇÕES DE DESENHO
+  */
+
+//Desenha uma célula (um quadradinho da grid)
+//Size é o tamanho dos lados do quadrado
+void draw_cell(state a,double size){
+  double temp = size/2;
+  double x = a.x;
+  double y = a.y;
+  glBegin(GL_QUADS);
+  glVertex2f(x - temp,y - temp);
+  glVertex2f(x - temp,y + temp);
+  glVertex2f(x + temp,y + temp);
+  glVertex2f(x + temp,y - temp);
+  glEnd();
+
+
+  glLineWidth(1);
+  glBegin(GL_LINE_LOOP);
+  glColor3f(1,1,1);
+  glVertex2f(x - temp,y - temp);
+  glVertex2f(x - temp,y + temp);
+  glVertex2f(x + temp,y + temp);
+  glVertex2f(x + temp,y - temp);
+  glEnd();
+}
+
+//Função principal para desenhar a grid inteira
+void draw_grid(hashmap* h,hashmap* open_h,state_list* path){
+  state a;
+  hashitem* temp;
+  int i = 0;
+
+  //Desenhamos as células no hashmap
+  for(i=0;i<h->size;i++){
+      temp = h->bucket[i];
+      while(temp != NULL){
+        if(temp->info.cost > 0) glColor3f(0.5,0.5,0.5);
+        else if(temp->info.cost < 0) glColor3f(1,1,1);
+        else glColor3f(0,1,1);
+        draw_cell(temp->key,1);
+        temp = temp->next;
+      }//Fim do while
+    }//Fim do for
+
+    //Começo e Fim
+    glBegin(GL_QUADS);
+    glColor3f(1,0,0);
+    draw_cell(start,1);
+    glEnd();
+
+    glBegin(GL_QUADS);
+    glColor3f(0,0,1);
+    draw_cell(goal,1);
+    glEnd();
+
+    //Desenha a openHash
+
+    for(i=0;i<open_h->size;i++){
+        temp = open_h->bucket[i];
+        while(temp != NULL){
+          glColor3f(0.72,0.42,0.27);
+          draw_cell(temp->key,1);
+          temp = temp->next;
+        }//Fim do while
+      }//Fim do for
+
+      //Agora uma linha para o path
+      glLineWidth(5);
+      glBegin(GL_LINE_STRIP);
+      glColor3f(0,0.9,0.3);
+
+      state_list* temp_l;
+      for(temp_l = path;temp_l != NULL;temp_l = temp_l->next){
+        glVertex3f(temp_l->s->x,temp_l->s->y,0.2);
+      }
+      glEnd();
+  }
