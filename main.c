@@ -23,13 +23,41 @@ hashmap* open_h;
 bin_heap* open_list;
 state_list* path;
 
-int hei;
-int wid;
-int window;
+//Flags
+int grid_flag = -1;
+int auto_replan_flag = -1;
 
-int scale = 8;
+//Largura e altura da janela
+int wid;
+int hei;
+
+//Escala de x e y (para 800x600, escala 8 e 6 causam 100x100)
+int scale_x = 8;
+int scale_y = 6;
+
+//Para função do mouse
 int mbutton = 0;
 int mstate = 0;
+
+//Se quiser grid nos escuros também
+void draw_for_dark_cells(int size){
+  glLineWidth(1);
+  int i;
+  int e;
+  double temp = (double)size/2;
+  int limit_x = (int)wid/scale_x;
+  int limit_y = (int)hei/scale_y;
+  for(i=-1;i<limit_x;i++)
+    for(e=-1;e<limit_y;e++){
+      glBegin(GL_LINE_LOOP);
+      glColor3f(1,1,1);
+      glVertex2f(i - temp,e - temp);
+      glVertex2f(i - temp,e + temp);
+      glVertex2f(i + temp,e + temp);
+      glVertex2f(i + temp,e - temp);
+      glEnd();
+    }
+}
 
 void InitGL(int Width, int Height){
   wid = Width;
@@ -45,7 +73,7 @@ void InitGL(int Width, int Height){
   glMatrixMode(GL_MODELVIEW);
 }
 
-void ReSizeGLScene(int Width,int Height){
+void ReshapeFunc(int Width,int Height){
   wid = Width;
   hei = Height;
 
@@ -56,55 +84,86 @@ void ReSizeGLScene(int Width,int Height){
   glMatrixMode(GL_MODELVIEW);
 }
 
-void DrawGLScene(){
-  usleep(100);
+void DisplayFunc(){
 
+  //Limpa a tela
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+  //Auto replan ligado entra aqui
+  if(auto_replan_flag == 1){
+    path = replan(path,h,open_h,open_list);
+    glColor3f(0,1,0);
+    glRasterPos2f(5, hei - 30);
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,'A');
+  }
+
   glLoadIdentity();
   glPushMatrix();
 
-  glScaled(scale,scale,1);
+  //Para ficar mais visível
+  glScaled(scale_x,scale_y,1);
 
   draw_grid(h,open_h,path);
+
+  if(grid_flag == 1){
+  draw_for_dark_cells(1);
+  }
 
   glPopMatrix();
   glutSwapBuffers();
 }
 
-void keyPressed(unsigned char key,int x,int y){
+void KeyboardFunc(unsigned char key,int x,int y){
   usleep(100);
+
+/* CONTROLES
+ * R - causa o replan
+ * G - coloca grid nas células escuras
+ */
 
   switch(key){
     case 'R':
     case 'r':
       path = replan(path,h,open_h,open_list);
       break;
+    case 'G':
+    case 'g':
+      grid_flag = -grid_flag;
+      break;
+    case 'A':
+    case 'a':
+      auto_replan_flag = -auto_replan_flag;
+      break;
   }
 
 }
 
-void mouseFunc(int button,int state,int x,int y){
-  y = hei - y + (scale/2);
-  x += scale/2;
+void MouseFunc(int button,int state,int x,int y){
+  y = hei - y + (scale_y/2);
+  x += scale_x/2;
+
+  y /= scale_y;
+  x /= scale_x;
 
   mbutton = button;
 
   if((mstate = state) == GLUT_DOWN){
     if(button == GLUT_LEFT_BUTTON){
-      update_cell(x/scale,y/scale,-1,h,open_h,open_list);
+      update_cell(x,y,-1,h,open_h,open_list);
     }
     if(button == GLUT_RIGHT_BUTTON){
-      update_start(x/scale,y/scale,h);
+      update_start(x,y,h);
     }
   }
 }
 
-void mouseMotionFunc(int x,int y){
-  y = hei - y + (scale/2);
-  x += scale/2;
+//Para o movimento do mouse
+void MotionFunc(int x,int y){
+  y = hei - y + (scale_y/2);
+  x += scale_x/2;
 
-  y /= scale;
-  x /= scale;
+  y /= scale_y;
+  x /= scale_x;
 
   if(mstate == GLUT_DOWN){
     if(mbutton == GLUT_LEFT_BUTTON){
@@ -112,6 +171,7 @@ void mouseMotionFunc(int x,int y){
     }
   }
 }
+
 //Argumento 1 = Arquivo
 //Argumento 2 = Binário (1) ou fibonacci (2)
 int main (int argc, char** argv){
@@ -119,17 +179,40 @@ int main (int argc, char** argv){
   //Iniciando glut
   glutInit(&argc,argv);
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-  glutInitWindowSize(800,800);
+  glutInitWindowSize(800,600);
   glutInitWindowPosition(100,100);
+  glutCreateWindow("dstarlite");
 
-  window = glutCreateWindow("dstarlite");
+  //Para pegar start e goal se passados
+  int xs = 5;
+  int ys = 5;
+  int xg = 95;
+  int yg = 95;
 
-  glutDisplayFunc(&DrawGLScene);
-  glutIdleFunc(&DrawGLScene);
-  glutReshapeFunc(&ReSizeGLScene);
-  glutKeyboardFunc(&keyPressed);
-  glutMouseFunc(&mouseFunc);
-  glutMotionFunc(&mouseMotionFunc);
+  if(argc > 2){
+    scale_x = atoi(argv[1]);
+    scale_y = atoi(argv[2]);
+  }
+  if(argc > 6 ){
+    xs = atoi(argv[3]);
+    ys = atoi(argv[4]);
+    xg = atoi(argv[5]);
+    yg = atoi(argv[6]);
+  }
+  //Reservado para passar nome de arquivo com testes...
+  if(argc > 7){
+
+  }
+
+  //Display
+  glutDisplayFunc(&DisplayFunc);
+  glutReshapeFunc(&ReshapeFunc);
+  glutIdleFunc(&DisplayFunc);
+  //Mouse
+  glutMouseFunc(&MouseFunc);
+  glutMotionFunc(&MotionFunc);
+  //Keyboard
+  glutKeyboardFunc(&KeyboardFunc);
 
   //Inicializando estruturas de dados
   h = create_hashmap(1024);
@@ -138,7 +221,7 @@ int main (int argc, char** argv){
   path = NULL;
 
   //Inicializamos o algoritmo
-  init(&h,&open_h,&open_list,&path,1,1,80,80);
+  init(&h,&open_h,&open_list,&path,xs,ys,xg,yg);
   //printf("|%d|\n",h->count);
 
   //hashmap_print(h);
@@ -172,7 +255,7 @@ int main (int argc, char** argv){
   update_cell(4,4,-1,h,open_h,open_list);
   update_cell(4,5,-1,h,open_h,open_list);*/
 
-  //printf("VAI COMECAR O SEGUNDO REPLAN ! ! !\n\n\n\n\n");
+  //Replan inicial para já mostrar a linha reta
   path = replan(path,h,open_h,open_list);
 
   /*state_list* lel = path;
