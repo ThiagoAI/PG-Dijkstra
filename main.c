@@ -16,6 +16,7 @@
 #include "hashmap.h"
 #include "state.h"
 #include "dstarlite.h"
+#include "astar.h"
 
 //Precisam ser globais para openGL
 hashmap* h;
@@ -175,7 +176,15 @@ void MotionFunc(int x,int y){
 //Argumento 1 = Arquivo
 //Argumento 2 = Binário (1) ou fibonacci (2)
 int main (int argc, char** argv){
-
+  hashmap_a* h_a = create_hashmap_a(1024);
+  heap_a* open_list_a = create_heap_bin_a(1024);
+  printf("lol\n");
+  block_cell_a(h_a,5,5);
+  astar(1,1,10,10,h_a,open_list_a);
+  printf("ACABOU ASTAR\n\n\n\n");
+  print_path(h_a,10,10);
+  printf("oi\n");
+  return 0;
   //Iniciando glut
   glutInit(&argc,argv);
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);

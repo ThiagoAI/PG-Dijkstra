@@ -581,7 +581,6 @@ void draw_cell(state a,double size){
   glVertex2f(x + temp,y - temp);
   glEnd();
 
-
   glLineWidth(1);
   glBegin(GL_LINE_LOOP);
   glColor3f(1,1,1);

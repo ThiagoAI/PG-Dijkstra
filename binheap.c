@@ -24,28 +24,6 @@ bin_heap* create_heap_bin(int size){
   return bin;
 }
 
-//Inicialização do nodo
-/*bin_node* create_node_bin(state a){
-	bin_node bin = (bin_node*)malloc(sizeof(bin_node));
-	bin->key = a;
-	bin->priority = 0;
-  return bin;
-}*/
-
-//FUNÇÕES PARA ACHAR OS "RELATIVES" DO NODO
-//Note que usamos index-1 para o pai pois os IDs dos testes começam em 1
-/*int parent(int index){
-	return (index)/2;
-}
-
-int left(int index){
-	return (2 * index);
-}
-
-int right(int index){
-	return (2 * index + 1);
-}*/
-
 //Pega mas não remove o elemento no topo da heap
 state* peek(bin_heap* heap){
 		if(heap == NULL || !heap->n ) return NULL;
@@ -120,23 +98,7 @@ state* pop(bin_heap* heap){
 	heap->heap[0] = heap->heap[heap->n - 1];
 	heap->heap[heap->n - 1] = NULL;
 	heap->n--;
-
-	/*if(a->x == 4 && a->y == 5){
-		state* x1 = heap->heap[0];
-		state* x2 = heap->heap[1];
-		state* x3 = heap->heap[2];
-		printf("WE HERE BOIS %d %d %.3lf %.3lf| %d %d %.3lf %.3lf| %d %d %.3lf %.3lf\n",x1->x,x1->y,x1->k[0],x1->k[1],x2->x,x2->y,x2->k[0],x2->k[1],x3->x,x3->y,x3->k[0],x3->k[1]);
-		printf("wut wat - %d\n",lt_states(*x2,*x1));
-		printf("wut wat - %d\n",lt_states(*x3,*x1));
-		heapify(heap,0);
-		 x1 = heap->heap[0];
-		 x2 = heap->heap[1];
-		 x3 = heap->heap[2];
-		printf("WE HERE BOIS %d %d %.3lf %.3lf| %d %d %.3lf %.3lf| %d %d %.3lf %.3lf\n",x1->x,x1->y,x1->k[0],x1->k[1],x2->x,x2->y,x2->k[0],x2->k[1],x3->x,x3->y,x3->k[0],x3->k[1]);
-		printf("wut wat - %d\n",lt_states(*x2,*x1));
-		printf("wut wat - %d\n",lt_states(*x3,*x1));
-		exit(0);
-	}*/
+	
 	//Acerta heap
 	heapify(heap,0);
 

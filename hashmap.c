@@ -75,10 +75,7 @@ void hashmap_remove(hashmap* h,state a){
   hashitem* item = h->bucket[i];
   hashitem* next;
 
-  if(item == NULL){
-    printf("HASHMAP NULL\n\n");
-    return;
-  }
+  if(item == NULL) return;
 
   //Se for o primeiro
   if(eq_states(item->key,a)){
