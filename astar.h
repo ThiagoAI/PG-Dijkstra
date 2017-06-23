@@ -55,9 +55,13 @@ typedef struct bin_heapstruct_a{
 
 hashmap_a* create_hashmap_a(int size);
 heap_a* create_heap_bin_a(int size);
+void hashmap_clear_a(hashmap_a** ha,int free_cells);
+void clear_heap_a(heap_a* heap);
 
 void block_cell_a(hashmap_a* h,int x,int y);
-void astar(int xs,int ys,int xg,int yg,hashmap_a* h_a,heap_a* open_list);
+void astar(int xs,int ys,int xg,int yg,hashmap_a* h_a,hashmap_a* blocked_a,heap_a* open_list);
 void print_path(hashmap_a* h,int xg,int yg);
+
+void draw_grid_a(hashmap_a* h_a,hashmap_a*blocked_a,int gx,int gy);
 
 #endif

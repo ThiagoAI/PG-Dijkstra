@@ -3,6 +3,11 @@
 #include <math.h> //Tem define M_SQRT2 que é a raiz quadrada de 2
 #include <float.h>
 
+//Open GL
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+
 #include "astar.h"
 
 #define LCHILD(x) 2*x + 1
@@ -136,8 +141,8 @@ int hash_a(cell* a){
      if(h->cells[i] != NULL){
        temp = h->cells[i];
        while(temp != NULL){
-
          temp2 = temp->next;
+
          if(free_cells) free(temp->c);
          free(temp);
          temp = temp2;
@@ -354,9 +359,6 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,heap_a* open_list){
 
   //Se já avaliamos antes...
   if(temp2 != NULL){
-    if(x == 5 && y == 5){
-      printf("why though | %d %d | %lf\n",a->x,a->y,temp->f);
-    }
     //Se estiver closed...
     if(temp2->is_closed == TRUE){
       //cell* temp3 = temp2;
@@ -384,12 +386,10 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,heap_a* open_list){
   push_a(open_list,temp);
 }
 
- void astar(int xs,int ys,int xg,int yg,hashmap_a* h_a,heap_a* open_list){
-   //Limpamos os hashmaps e closedlist
-   //clear_heap_a(open_list);
-   //hashmap_clear_a(&h_a,TRUE);
-   //hashmap_clear_a(&closed_list,FALSE);
-   //TODO vai dar double free aqui...
+ void astar(int xs,int ys,int xg,int yg,hashmap_a* h_a,hashmap_a* blocked_a,heap_a* open_list){
+   //Limpamos a heap e o hashmap
+   clear_heap_a(open_list);
+   hashmap_clear_a(&h_a,TRUE);
 
    start_a = create_cell_a(xs,ys);
    goal_a = create_cell_a(xg,yg);
@@ -406,14 +406,20 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,heap_a* open_list){
      cell* temp = pop_a(open_list);
      temp->is_open = -1;
      temp->is_closed = TRUE;
-     printf("%d %d | \n\n",temp->x,temp->y);
-     if(temp->x < 0){
+
+     //printf("%d %d | \n\n",temp->x,temp->y);
+
+     //Se estiver bloqueado não fazemos nada
+     if(hashmap_get_a(blocked_a,temp) != NULL) continue;
+
+     /*if(temp->x < 0){
        printf("ERRO\n");
        exit(0);
-     }
+     }*/
+     
      //Se é goal, acabou.
      if(temp->x == xg && temp->y == yg){
-       printf("GOAL FOUND\n\n\n\n");
+       //printf("GOAL FOUND\n\n\n\n");
        return;
      }
 
@@ -439,14 +445,149 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,heap_a* open_list){
  }
 
 //Imprime caminho de start até goal
- void print_path(hashmap_a* h,int xg,int yg){
+ void print_path(hashmap_a* h,int gx,int gy){
    cell go;
-   go.x = xg;
-   go.y = yg;
+   go.x = gx;
+   go.y = gy;
    cell* temp = hashmap_get_a(h,&go);
 
    if(temp->parent != NULL)
      print_path(h,temp->parent->x,temp->parent->y);
 
    printf(" %d| %d | %.2lf\n",temp->x,temp->y,temp->f);
+ }
+
+ //Desenha uma célula (um quadradinho da grid)
+ //Size é o tamanho dos lados do quadrado
+ void draw_cell_a(cell* a,double size){
+   double temp = size/2;
+   double x = a->x;
+   double y = a->y;
+   glBegin(GL_QUADS);
+   glVertex2f(x - temp,y - temp);
+   glVertex2f(x - temp,y + temp);
+   glVertex2f(x + temp,y + temp);
+   glVertex2f(x + temp,y - temp);
+   glEnd();
+
+   glLineWidth(1);
+   glBegin(GL_LINE_LOOP);
+   glColor3f(1,1,1);
+   glVertex2f(x - temp,y - temp);
+   glVertex2f(x - temp,y + temp);
+   glVertex2f(x + temp,y + temp);
+   glVertex2f(x + temp,y - temp);
+   glEnd();
+ }
+
+ //Função principal para desenhar a grid inteira
+ /*void draw_grid(hashmap* h,hashmap* open_h,state_list* path){
+   state a;
+   hashitem* temp;
+   int i = 0;
+
+   //Desenhamos as células no hashmap
+   for(i=0;i<h->size;i++){
+       temp = h->bucket[i];
+       while(temp != NULL){
+         if(temp->info.cost > 0) glColor3f(0.5,0.5,0.5);
+         else if(temp->info.cost < 0) glColor3f(1,1,1);
+         else glColor3f(0,1,1);
+         draw_cell(temp->key,1);
+         temp = temp->next;
+       }//Fim do while
+     }//Fim do for
+
+     //Começo e Fim
+     glBegin(GL_QUADS);
+     glColor3f(1,0,0);
+     draw_cell(start,1);
+     glEnd();
+
+     glBegin(GL_QUADS);
+     glColor3f(0,0,1);
+     draw_cell(goal,1);
+     glEnd();
+
+     //Desenha a openHash
+
+     for(i=0;i<open_h->size;i++){
+         temp = open_h->bucket[i];
+         while(temp != NULL){
+           glColor3f(0.72,0.42,0.27);
+           draw_cell(temp->key,1);
+           temp = temp->next;
+         }//Fim do while
+       }//Fim do for
+
+       //Agora uma linha para o path
+       glLineWidth(5);
+       glBegin(GL_LINE_STRIP);
+       glColor3f(0,0.9,0.3);
+
+       state_list* temp_l;
+       for(temp_l = path;temp_l != NULL;temp_l = temp_l->next){
+         glVertex3f(temp_l->s->x,temp_l->s->y,0.2);
+       }
+       glEnd();
+   }*/
+
+ void draw_grid_a(hashmap_a* h_a,hashmap_a*blocked_a,int gx,int gy){
+   //cell* a;
+   hashitem_a* temp;
+   int i = 0;
+
+   //Desenhamos as células no hashmap
+   glColor3f(0.5,0.5,0.5);
+   for(i=0;i<h_a->size;i++){
+       temp = h_a->cells[i];
+       while(temp != NULL){
+         //else if(temp->info.cost < 0) glColor3f(1,1,1);
+         //else glColor3f(0,1,1);
+         draw_cell_a(temp->c,1);
+         temp = temp->next;
+       }//Fim do while
+     }//Fim do for
+
+     //Células fechadas
+     glColor3f(1,1,1);
+     for(i=0;i<blocked_a->size;i++){
+         temp = blocked_a->cells[i];
+         while(temp != NULL){
+           //else if(temp->info.cost < 0) glColor3f(1,1,1);
+           //else glColor3f(0,1,1);
+           draw_cell_a(temp->c,1);
+           temp = temp->next;
+         }//Fim do while
+       }//Fim do for
+
+       //Agora desenhamos o caminho
+       cell go;
+       go.x = gx;
+       go.y = gy;
+       cell* c = hashmap_get_a(h_a,&go);
+
+       //Goal
+       glBegin(GL_QUADS);
+       glColor3f(1,0,0);
+       draw_cell_a(c,1);
+       glEnd();
+
+       glLineWidth(5);
+       glBegin(GL_LINE_STRIP);
+       glColor3f(0.9,0.9,0.3);
+
+       while(c->parent != NULL){
+          glVertex3f(c->x,c->y,0.2);
+          c = c->parent;
+       }
+       glVertex3f(c->x,c->y,0.2);
+       glEnd();
+
+       //Start
+       glBegin(GL_QUADS);
+       glColor3f(0,0,1);
+       draw_cell_a(c,1);
+       glEnd();
+
  }

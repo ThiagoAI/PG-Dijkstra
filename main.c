@@ -24,13 +24,26 @@ hashmap* open_h;
 bin_heap* open_list;
 state_list* path;
 
+hashmap_a* blocked_a;
+hashmap_a* h_a;
+heap_a* open_list_a;
+
 //Flags
 int grid_flag = -1;
 int auto_replan_flag = -1;
 
+//Se 0 roda D* Lite, do contrário A*
+int astar_run = 0;
+
 //Largura e altura da janela
 int wid;
 int hei;
+
+//Goal x e y Star x e y
+int gx;
+int gy;
+int sx;
+int sy;
 
 //Escala de x e y (para 800x600, escala 8 e 6 causam 100x100)
 int scale_x = 8;
@@ -42,6 +55,9 @@ int mstate = 0;
 
 //Se quiser grid nos escuros também
 void draw_for_dark_cells(int size){
+
+  if(astar_run) return;
+
   glLineWidth(1);
   int i;
   int e;
@@ -92,10 +108,15 @@ void DisplayFunc(){
 
   //Auto replan ligado entra aqui
   if(auto_replan_flag == 1){
-    path = replan(path,h,open_h,open_list);
-    glColor3f(0,1,0);
-    glRasterPos2f(5, hei - 30);
-    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,'A');
+    if(astar_run){
+      astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
+    }
+    else{
+      path = replan(path,h,open_h,open_list);
+    }
+      glColor3f(0,1,0);
+      glRasterPos2f(5, hei - 30);
+      glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,'A');
   }
 
   glLoadIdentity();
@@ -104,9 +125,13 @@ void DisplayFunc(){
   //Para ficar mais visível
   glScaled(scale_x,scale_y,1);
 
-  draw_grid(h,open_h,path);
+  if(astar_run){
+    astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
+    draw_grid_a(h_a,blocked_a,gx,gy);
+  }
+  else draw_grid(h,open_h,path);
 
-  if(grid_flag == 1){
+  if(grid_flag == 1 && !astar_run){
   draw_for_dark_cells(1);
   }
 
@@ -125,7 +150,8 @@ void KeyboardFunc(unsigned char key,int x,int y){
   switch(key){
     case 'R':
     case 'r':
-      path = replan(path,h,open_h,open_list);
+      if(astar_run) astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
+      else path = replan(path,h,open_h,open_list);
       break;
     case 'G':
     case 'g':
@@ -135,6 +161,9 @@ void KeyboardFunc(unsigned char key,int x,int y){
     case 'a':
       auto_replan_flag = -auto_replan_flag;
       break;
+    case 'C':
+    case 'c':
+      astar_run = (astar_run == 0)? 1 : 0;
   }
 
 }
@@ -176,28 +205,32 @@ void MotionFunc(int x,int y){
 //Argumento 1 = Arquivo
 //Argumento 2 = Binário (1) ou fibonacci (2)
 int main (int argc, char** argv){
-  hashmap_a* h_a = create_hashmap_a(1024);
-  heap_a* open_list_a = create_heap_bin_a(1024);
-  printf("lol\n");
-  block_cell_a(h_a,5,6);
-  block_cell_a(h_a,5,5);
-  block_cell_a(h_a,5,6);
-  block_cell_a(h_a,5,4);
-  block_cell_a(h_a,5,3);
+  /*printf("lol\n");
+  block_cell_a(blocked_a,5,6);
+  block_cell_a(blocked_a,5,5);
+  block_cell_a(blocked_a,5,6);
+  block_cell_a(blocked_a,5,4);
+  block_cell_a(blocked_a,5,3);
 
-  block_cell_a(h_a,10,11);
-  block_cell_a(h_a,10,9);
-  block_cell_a(h_a,9,11);
-  block_cell_a(h_a,9,10);
-  block_cell_a(h_a,9,9);
+  block_cell_a(blocked_a,10,11);
+  block_cell_a(blocked_a,10,9);
+  block_cell_a(blocked_a,9,11);
+  block_cell_a(blocked_a,9,10);
+  block_cell_a(blocked_a,9,9);
   //block_cell_a(h_a,5,5);
   //block_cell_a(h_a,5,5);
 
-  astar(1,1,10,10,h_a,open_list_a);
+  astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
+
   printf("ACABOU ASTAR\n\n\n\n");
   print_path(h_a,10,10);
   printf("oi\n");
-  return 0;
+  clear_heap_a(open_list_a);
+  hashmap_clear_a(&h_a,1);
+  block_cell_a(blocked_a,5,7);
+  astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
+  print_path(h_a,10,10);
+  return 0;*/
   //Iniciando glut
   glutInit(&argc,argv);
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
@@ -206,20 +239,20 @@ int main (int argc, char** argv){
   glutCreateWindow("dstarlite");
 
   //Para pegar start e goal se passados
-  int xs = 5;
-  int ys = 5;
-  int xg = 95;
-  int yg = 95;
+  sx = 5;
+  sy = 5;
+  gx = 95;
+  gy = 95;
 
   if(argc > 2){
     scale_x = atoi(argv[1]);
     scale_y = atoi(argv[2]);
   }
   if(argc > 6 ){
-    xs = atoi(argv[3]);
-    ys = atoi(argv[4]);
-    xg = atoi(argv[5]);
-    yg = atoi(argv[6]);
+    sx = atoi(argv[3]);
+    sy = atoi(argv[4]);
+    gx = atoi(argv[5]);
+    gy = atoi(argv[6]);
   }
   //Reservado para passar nome de arquivo com testes...
   if(argc > 7){
@@ -236,100 +269,26 @@ int main (int argc, char** argv){
   //Keyboard
   glutKeyboardFunc(&KeyboardFunc);
 
-  //Inicializando estruturas de dados
+  //Inicializando estruturas de dados do D* Lite
   h = create_hashmap(1024);
   open_h = create_hashmap(1024);
   open_list = create_heap_bin(1024);
   path = NULL;
 
-  //Inicializamos o algoritmo
-  init(&h,&open_h,&open_list,&path,xs,ys,xg,yg);
-  //printf("|%d|\n",h->count);
+  //Inicializando estruturas do A*
+  blocked_a = create_hashmap_a(1024);
+  h_a = create_hashmap_a(1024);
+  open_list_a = create_heap_bin_a(1024);
 
-  //hashmap_print(h);
-  //hashmap_print(open_h);
 
-  //update_cell(2,2,-1,h,open_h,open_list);
-  //path = replan(path,h,open_h,open_list);
-
-  //update_cell(3,3,-1,h,open_h,open_list);
-
-  //update_cell(2,1,-1,h,open_h,open_list);
-  //update_cell(2,2,-1,h,open_h,open_list);
-
-  //path = replan(path,h,open_h,open_list);
-
-  /*update_cell(1,3,-1,h,open_h,open_list);
-  //update_cell(2,1,-1,h,open_h,open_list);
-  update_cell(2,3,-1,h,open_h,open_list);
-  update_cell(3,3,-1,h,open_h,open_list);
-  update_cell(3,2,-1,h,open_h,open_list);
-  update_cell(3,1,-1,h,open_h,open_list);
-  update_cell(1,1,-1,h,open_h,open_list);
-  update_cell(1,2,-1,h,open_h,open_list);
-
-  update_cell(4,6,-1,h,open_h,open_list);
-  //update_cell(2,1,-1,h,open_h,open_list);
-  update_cell(5,6,-1,h,open_h,open_list);
-  update_cell(6,5,-1,h,open_h,open_list);
-  update_cell(6,4,-1,h,open_h,open_list);
-  update_cell(5,4,-1,h,open_h,open_list);
-  update_cell(4,4,-1,h,open_h,open_list);
-  update_cell(4,5,-1,h,open_h,open_list);*/
+  //Inicializamos o algoritmo D* Lite
+  init(&h,&open_h,&open_list,&path,sx,sy,gx,gy);
 
   //Replan inicial para já mostrar a linha reta
   path = replan(path,h,open_h,open_list);
-
-  /*state_list* lel = path;
-  state* xx;
-  printf("\n\n");
-  for(lel = path;lel != NULL;lel = lel->next){
-    xx = lel->s;
-    printf("%d - %d |%lf |%lf\n\n",xx->x,xx->y,xx->k[0],xx->k[1]);
-  }*/
-
-  //InitGL(800,800);
 
   glutMainLoop();
 
   return 0;
 
-  //hashmap* h = create_hashmap(256);
-
-  /*double k[2] = {100,100};
-  state a = create_state(1,1,k);
-  cellinfo b = create_info();
-  b.rhs = 10;
-  hashmap_add(h,a,b,-1);
-
-  double l[2] = {130,130};
-  state c = create_state(1,2,l);
-  cellinfo d = create_info();
-  d.rhs = 11;
-  hashmap_add(h,c,d,-1);
-
-  double m[2] = {0,0};
-  state e = create_state(1,3,m);
-  cellinfo f = create_info();
-  f.rhs = 15;
-  hashmap_add(h,e,f,-1);
-
-  hashitem* x = hashmap_get(h,a);
-  printf("OI %lf\n",x->info.rhs);
-  x = hashmap_get(h,c);
-  printf("IA %lf\n",x->info.rhs);
-  x = hashmap_get(h,e);
-  printf("IA %lf\n",x->info.rhs);
-
-  set_rhs(e,400.5,h);
-
-  x = hashmap_get(h,e);
-  printf("LOL %lf\n",x->info.rhs);
-
-  hashmap_clear(h);
-
-  x = hashmap_get(h,e);
-  if(x == NULL) printf("PIRANHA\n");
-  else printf("IA %lf\n",x->info.rhs);
-  */
 }
