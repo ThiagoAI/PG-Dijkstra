@@ -354,8 +354,8 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,heap_a* open_list){
 
   //Se já avaliamos antes...
   if(temp2 != NULL){
-    if(x == 10 && y == 10){
-      printf("||ola chegamos no goal | %d %d | %lf\n",a->x,a->y,temp->f);
+    if(x == 5 && y == 5){
+      printf("why though | %d %d | %lf\n",a->x,a->y,temp->f);
     }
     //Se estiver closed...
     if(temp2->is_closed == TRUE){
@@ -386,8 +386,8 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,heap_a* open_list){
 
  void astar(int xs,int ys,int xg,int yg,hashmap_a* h_a,heap_a* open_list){
    //Limpamos os hashmaps e closedlist
-   clear_heap_a(open_list);
-   hashmap_clear_a(&h_a,TRUE);
+   //clear_heap_a(open_list);
+   //hashmap_clear_a(&h_a,TRUE);
    //hashmap_clear_a(&closed_list,FALSE);
    //TODO vai dar double free aqui...
 

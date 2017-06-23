@@ -179,7 +179,20 @@ int main (int argc, char** argv){
   hashmap_a* h_a = create_hashmap_a(1024);
   heap_a* open_list_a = create_heap_bin_a(1024);
   printf("lol\n");
+  block_cell_a(h_a,5,6);
   block_cell_a(h_a,5,5);
+  block_cell_a(h_a,5,6);
+  block_cell_a(h_a,5,4);
+  block_cell_a(h_a,5,3);
+
+  block_cell_a(h_a,10,11);
+  block_cell_a(h_a,10,9);
+  block_cell_a(h_a,9,11);
+  block_cell_a(h_a,9,10);
+  block_cell_a(h_a,9,9);
+  //block_cell_a(h_a,5,5);
+  //block_cell_a(h_a,5,5);
+
   astar(1,1,10,10,h_a,open_list_a);
   printf("ACABOU ASTAR\n\n\n\n");
   print_path(h_a,10,10);
