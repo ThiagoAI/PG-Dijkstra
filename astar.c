@@ -180,7 +180,7 @@ int hash_a(cell* a){
   //Insere na heap
   void push_a(heap_a* heap,cell* a){
   	//bin_node* bin = create_node_bin(a);
-
+    printf("%d\n",heap->n);
   	//Se passar do tamanho máxmo temos que aumentar
   	if(heap->n + 1 >= heap->size){
   		heap->size = heap->size*2;
@@ -192,71 +192,89 @@ int hash_a(cell* a){
 
   	while(i && a->f < heap->heap[PARENT(i)]->f){
   		heap->heap[i] = heap->heap[PARENT(i)];
+      heap->heap[i]->is_open = i;
   		i = PARENT(i);
   	}
 
+    printf("|| %d %d %d\n",i,a->x,a->y);
   	heap->heap[i] = a;
     a->is_open = i;
   	heap->n++;
   }
 
   //Troca dois cells de lugar no array
-  void swap_a(cell** x,cell** y){
-    int t = (*x)->is_open;
-    (*x)->is_open = (*y)->is_open;
-    (*y)->is_open = t;
-  	cell* temp = *x;
-  	*x = *y;
-  	*y = temp;
+  void swap_a(heap_a* h,cell* x,cell* y){
+    if(h->heap[x->is_open] == NULL ||h->heap[y->is_open] == NULL) printf("MADNESS\n\n\n\n\n\n");
+    printf("lol %d %d %d %d\n\n\n\n",x->x,x->y,y->x,y->y);
+    int i = x->is_open;
+    int e = y->is_open;
+    printf("lol\n\n\n\n\n");
+    //printf("| %d %d | %d %d\n",h->heap[x->is_open]->x,h->heap[x->is_open]->y,h->heap[y->is_open]->x,h->heap[y->is_open]->y);
+    printf("| %d %d\n",x->is_open,y->is_open);
+    printf("lool\n\n\n\n");
+    h->heap[i] = y;
+    h->heap[e] = x;
+    x->is_open = e;
+    y->is_open = i;
+    printf("%d %d | %d %d\n",h->heap[x->is_open]->x,h->heap[x->is_open]->y,h->heap[y->is_open]->x,h->heap[y->is_open]->y);
+    printf("%d %d\n",x->is_open,y->is_open);
+    //exit(1);
   }
 
   //Compara i com seus filhos, se um deles for menor, troca o menor com i e executa heapify no próximo nível da árvore
   void heapify_a(heap_a* heap,int i){
   	//int largest = 0;
+    printf("heapify1\n\n\n\n");
   	int smallest = (LCHILD(i) < heap->n && heap->heap[LCHILD(i)]->f < heap->heap[i]->f) ? LCHILD(i) : i;
 
   	//if(smallest == LCHILD(i)) largest = i;
   	//else largest = LCHILD(i);
-
+printf("heapify2\n\n\n\n");
   	if(RCHILD(i) < heap->n && heap->heap[RCHILD(i)]->f < heap->heap[smallest]->f){
   		smallest = RCHILD(i);
   	}
-
+printf("heapify3 %d %d\n\n\n\n",smallest,i);
   	if(smallest != i){
-  		swap_a(&(heap->heap[i]),&(heap->heap[smallest]));
+      printf("heapify4 %d %d\n\n\n\n",smallest,i);
+      if(heap->heap[i] == NULL || heap->heap[smallest] == NULL) printf("insanity\n\n\n");
+  		swap_a(heap,heap->heap[i],heap->heap[smallest]);
+      printf("heapify5\n\n\n\n");
   		heapify_a(heap,smallest);
   	}
-
+printf("heapify6\n\n\n\n");
   }
 
   //Para decreace key
   void heapify_up_a(heap_a* heap,int i){
 
-    int smallest = (LCHILD(i) < heap->n && heap->heap[LCHILD(i)]->f < heap->heap[i]->f) ? LCHILD(i) : i;
-
-  	//if(smallest == LCHILD(i)) largest = i;
-  	//else largest = LCHILD(i);
-
-  	if(RCHILD(i) < heap->n && heap->heap[RCHILD(i)]->f < heap->heap[smallest]->f){
-  		smallest = RCHILD(i);
-  	}
-
-  	if(smallest != i){
-  		swap_a(&(heap->heap[i]),&(heap->heap[smallest]));
-  		heapify_a(heap,PARENT(i));
-  	}
+    //Enqunto tiver pai...
+    while(i > 1){
+        int e = PARENT(i);
+        printf("uno %d | %d\n\n\n\n",i,e);
+        if(heap->heap[i] < heap->heap[e]){
+          swap_a(heap,heap->heap[i],heap->heap[e]);
+          printf("duos\n\n\n\n");
+        }
+        else return;
+        i = e;
+    }
   }
 
   //Diminui key de a
-  void decreace_key_a(heap_a* heap,cell* a){
-    int i = a->is_open;
-    if(i < 0) return;
+  void decreace_key_a(heap_a* heap,cell* a,int i){
+
+    if(i < 0){
+      printf("i < 0\n");
+      exit(1);
+    };
+
     cell* temp = heap->heap[i];
+
     temp->f = a->f;
     temp->h = a->h;
     temp->g = a->g;
     temp->parent = a->parent;
-
+    heap->heap[i] = temp;
     //Consertar a heap se necessário
     heapify_up_a(heap,i);
   }
@@ -270,12 +288,14 @@ int hash_a(cell* a){
   	//O mínimo
   	cell* a = heap->heap[0];
   	heap->heap[0] = heap->heap[heap->n - 1];
-  	heap->heap[heap->n - 1] = NULL;
+  	heap->heap[heap->n   - 1] = NULL;
+    if(heap->n > 1) heap->heap[0]->is_open = 0;
   	heap->n--;
 
   	//Acerta heap
+    //printf("pre heapify\n\n\n\n");
   	heapify_a(heap,0);
-
+    //printf("pos heapify\n\n\n\n");
   	return a;
   }
 
@@ -284,10 +304,7 @@ int hash_a(cell* a){
   	heap->n = 0;
   	int i = 0;
   	for(i=0;i<heap->size;i++){
-  		if(heap->heap[i] != NULL){
-  			//free(heap->heap[i]);
   			heap->heap[i] = NULL;
-  		}
   	}
   }
 
@@ -299,10 +316,7 @@ int hash_a(cell* a){
 
 //Heuristica do A* (eight way distance)
 double heuristic_a(cell* a,cell* b){
-  double x = a->x - b->x;
-  double y = a->y - b->y;
-  return sqrt((x*x) + (y*y));
-  /*double temp;
+  double temp;
   double min = fabs(a->x - b->x);
   double max = fabs(a->y - b->y);
   if(min > max){
@@ -310,18 +324,13 @@ double heuristic_a(cell* a,cell* b){
     min = max;
     max = temp;
   }
-  return ((M_SQRT2 - 1.0)*min + max);*/
+  return ((M_SQRT2 - 1.0)*min + max);
 }
 
 //Custo de ir de a para b (8-way)
 double cost_a(cell* a,cell* b){
-  int xd = fabs(a->x - b->x);
-  int yd = fabs(a->y - b->y);
-  double scale = 1;
-
-  if(xd + yd > 1) scale = M_SQRT2;
-
-  return scale;
+  if(a->x == b->x || a->y == b->y) return 1.0;
+  else return M_SQRT2;
 }
 
 //Bloqueia celula
@@ -341,15 +350,21 @@ void block_cell_a(hashmap_a* h,int x,int y){
 }
 
 //Faz update no vizinho. Se ele não está na hash, coloca ele lá. No final, coloca na open_list
-void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,heap_a* open_list){
+void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,hashmap_a* blocked_a,heap_a* open_list){
   cell* temp = create_cell_a(x,y);
   cell* temp2;
+
+  //Se estiver bloqueado não avaliamos
+  if(hashmap_get_a(blocked_a,temp) != NULL){
+    free(temp);
+    return;
+  }
 
   //Se não existe criamos
   temp2 = hashmap_get_a(h_a,temp);
   //if(temp2 == NULL) temp2 = temp;
   temp->h = heuristic_a(temp,goal_a);
-  temp->g = cost_a(temp,a);
+  temp->g = a->g + cost_a(temp,a);
   temp->f = temp->h + temp->g;
   temp->parent = a;
   //printf("%.2lf| %.2lf | %.2lf\n",temp->f,temp->h,temp->g);
@@ -361,18 +376,13 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,heap_a* open_list){
   if(temp2 != NULL){
     //Se estiver closed...
     if(temp2->is_closed == TRUE){
-      //cell* temp3 = temp2;
-      //temp2 = temp;
-      //temp2->is_closed = FALSE;
-      //free(temp3);
-      //push_a(open_list,temp2);
       free(temp);
       return;
     }
 
     //Se estiver na openlist
-    if(temp2->is_open >= 0 && temp2->f > temp->f){
-      decreace_key_a(open_list,temp);
+    if(temp2->is_open >= 0 && temp2->g > temp->g){
+      decreace_key_a(open_list,temp,temp2->is_open);
       free(temp);
       return;
     }
@@ -403,43 +413,46 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,heap_a* open_list){
    push_a(open_list,start_a);
 
    while(peek_a(open_list) != NULL){
+     printf("while start\n\n\n");
      cell* temp = pop_a(open_list);
+     printf("while after pop\n\n\n");
      temp->is_open = -1;
      temp->is_closed = TRUE;
 
      //printf("%d %d | \n\n",temp->x,temp->y);
 
-     //Se estiver bloqueado não fazemos nada
-     if(hashmap_get_a(blocked_a,temp) != NULL) continue;
-
      /*if(temp->x < 0){
        printf("ERRO\n");
        exit(0);
      }*/
-     
+
      //Se é goal, acabou.
      if(temp->x == xg && temp->y == yg){
        //printf("GOAL FOUND\n\n\n\n");
+       int u = 0;
+       for(u = 0;u < open_list->n+1;u++){
+         if(open_list->heap[u] == NULL) printf("LOA\n");
+         else printf("|| | %d | %d |%.5lf | %.5lf| %.5lf\n",u,open_list->heap[u]->is_open,open_list->heap[u]->g,open_list->heap[u]->h,open_list->heap[u]->f);
+
+       }
+       printf("|| | %d | %d |%.5lf | %.5lf| %.5lf\n",u,temp->is_open,temp->g,temp->h,temp->f);
        return;
      }
-
-     //Se estiver ocupado, ignora
-     if(temp->f < 0) continue;
 
      //Verificamos todos os 8 vizinhos
      int x_temp = temp->x;
      int y_temp = temp->y;
-
+ printf("hihihihihi\n\n\n\n");
      //Verificamos os vizinhos
-     update_sucessor(x_temp - 1,y_temp    ,temp,h_a,open_list);
-     update_sucessor(x_temp - 1,y_temp + 1,temp,h_a,open_list);
-     update_sucessor(x_temp    ,y_temp + 1,temp,h_a,open_list);
-     update_sucessor(x_temp + 1,y_temp + 1,temp,h_a,open_list);
-     update_sucessor(x_temp + 1,y_temp    ,temp,h_a,open_list);
-     update_sucessor(x_temp + 1,y_temp - 1,temp,h_a,open_list);
-     update_sucessor(x_temp    ,y_temp - 1,temp,h_a,open_list);
-     update_sucessor(x_temp - 1,y_temp - 1,temp,h_a,open_list);
-
+     update_sucessor(x_temp - 1,y_temp    ,temp,h_a,blocked_a,open_list);
+     update_sucessor(x_temp - 1,y_temp + 1,temp,h_a,blocked_a,open_list);
+     update_sucessor(x_temp    ,y_temp + 1,temp,h_a,blocked_a,open_list);
+     update_sucessor(x_temp + 1,y_temp + 1,temp,h_a,blocked_a,open_list);
+     update_sucessor(x_temp + 1,y_temp    ,temp,h_a,blocked_a,open_list);
+     update_sucessor(x_temp + 1,y_temp - 1,temp,h_a,blocked_a,open_list);
+     update_sucessor(x_temp    ,y_temp - 1,temp,h_a,blocked_a,open_list);
+     update_sucessor(x_temp - 1,y_temp - 1,temp,h_a,blocked_a,open_list);
+ printf("aaaaaaaaaaa\n\n\n\n");
    }
    //Se chegou aqui não há caminho para o final
  }
@@ -454,7 +467,7 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,heap_a* open_list){
    if(temp->parent != NULL)
      print_path(h,temp->parent->x,temp->parent->y);
 
-   printf(" %d| %d | %.2lf\n",temp->x,temp->y,temp->f);
+   printf(" %d| %d | %.2lf | %.2lf\n",temp->x,temp->y,temp->f,temp->g);
  }
 
  //Desenha uma célula (um quadradinho da grid)
@@ -470,73 +483,21 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,heap_a* open_list){
    glVertex2f(x + temp,y - temp);
    glEnd();
 
-   glLineWidth(1);
+   /*glLineWidth(1);
    glBegin(GL_LINE_LOOP);
    glColor3f(1,1,1);
    glVertex2f(x - temp,y - temp);
    glVertex2f(x - temp,y + temp);
    glVertex2f(x + temp,y + temp);
    glVertex2f(x + temp,y - temp);
-   glEnd();
+   glEnd();*/
  }
-
- //Função principal para desenhar a grid inteira
- /*void draw_grid(hashmap* h,hashmap* open_h,state_list* path){
-   state a;
-   hashitem* temp;
-   int i = 0;
-
-   //Desenhamos as células no hashmap
-   for(i=0;i<h->size;i++){
-       temp = h->bucket[i];
-       while(temp != NULL){
-         if(temp->info.cost > 0) glColor3f(0.5,0.5,0.5);
-         else if(temp->info.cost < 0) glColor3f(1,1,1);
-         else glColor3f(0,1,1);
-         draw_cell(temp->key,1);
-         temp = temp->next;
-       }//Fim do while
-     }//Fim do for
-
-     //Começo e Fim
-     glBegin(GL_QUADS);
-     glColor3f(1,0,0);
-     draw_cell(start,1);
-     glEnd();
-
-     glBegin(GL_QUADS);
-     glColor3f(0,0,1);
-     draw_cell(goal,1);
-     glEnd();
-
-     //Desenha a openHash
-
-     for(i=0;i<open_h->size;i++){
-         temp = open_h->bucket[i];
-         while(temp != NULL){
-           glColor3f(0.72,0.42,0.27);
-           draw_cell(temp->key,1);
-           temp = temp->next;
-         }//Fim do while
-       }//Fim do for
-
-       //Agora uma linha para o path
-       glLineWidth(5);
-       glBegin(GL_LINE_STRIP);
-       glColor3f(0,0.9,0.3);
-
-       state_list* temp_l;
-       for(temp_l = path;temp_l != NULL;temp_l = temp_l->next){
-         glVertex3f(temp_l->s->x,temp_l->s->y,0.2);
-       }
-       glEnd();
-   }*/
 
  void draw_grid_a(hashmap_a* h_a,hashmap_a*blocked_a,int gx,int gy){
    //cell* a;
    hashitem_a* temp;
    int i = 0;
-
+   //print_path(h_a,gx,gy);
    //Desenhamos as células no hashmap
    glColor3f(0.5,0.5,0.5);
    for(i=0;i<h_a->size;i++){
@@ -550,7 +511,7 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,heap_a* open_list){
      }//Fim do for
 
      //Células fechadas
-     glColor3f(1,1,1);
+     glColor3f(1,0.4,0.4);
      for(i=0;i<blocked_a->size;i++){
          temp = blocked_a->cells[i];
          while(temp != NULL){

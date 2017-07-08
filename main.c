@@ -109,6 +109,7 @@ void DisplayFunc(){
   //Auto replan ligado entra aqui
   if(auto_replan_flag == 1){
     if(astar_run){
+      printf("lel\n");
       astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
     }
     else{
@@ -126,7 +127,7 @@ void DisplayFunc(){
   glScaled(scale_x,scale_y,1);
 
   if(astar_run){
-    astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
+    //astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
     draw_grid_a(h_a,blocked_a,gx,gy);
   }
   else draw_grid(h,open_h,path);
@@ -164,6 +165,8 @@ void KeyboardFunc(unsigned char key,int x,int y){
     case 'C':
     case 'c':
       astar_run = (astar_run == 0)? 1 : 0;
+      astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
+      break;
   }
 
 }
@@ -180,6 +183,7 @@ void MouseFunc(int button,int state,int x,int y){
   if((mstate = state) == GLUT_DOWN){
     if(button == GLUT_LEFT_BUTTON){
       update_cell(x,y,-1,h,open_h,open_list);
+      block_cell_a(blocked_a,x,y);
     }
     if(button == GLUT_RIGHT_BUTTON){
       update_start(x,y,h);
@@ -198,6 +202,7 @@ void MotionFunc(int x,int y){
   if(mstate == GLUT_DOWN){
     if(mbutton == GLUT_LEFT_BUTTON){
       update_cell(x,y,-1,h,open_h,open_list);
+      block_cell_a(blocked_a,x,y);
     }
   }
 }
@@ -241,8 +246,8 @@ int main (int argc, char** argv){
   //Para pegar start e goal se passados
   sx = 5;
   sy = 5;
-  gx = 95;
-  gy = 95;
+  gx = 15;
+  gy = 15;
 
   if(argc > 2){
     scale_x = atoi(argv[1]);
@@ -270,15 +275,15 @@ int main (int argc, char** argv){
   glutKeyboardFunc(&KeyboardFunc);
 
   //Inicializando estruturas de dados do D* Lite
-  h = create_hashmap(1024);
-  open_h = create_hashmap(1024);
-  open_list = create_heap_bin(1024);
+  h = create_hashmap(32768);
+  open_h = create_hashmap(32768);
+  open_list = create_heap_bin(32768);
   path = NULL;
 
   //Inicializando estruturas do A*
-  blocked_a = create_hashmap_a(1024);
-  h_a = create_hashmap_a(1024);
-  open_list_a = create_heap_bin_a(1024);
+  blocked_a = create_hashmap_a(32768);
+  h_a = create_hashmap_a(32768);
+  open_list_a = create_heap_bin_a(32768);
 
 
   //Inicializamos o algoritmo D* Lite
