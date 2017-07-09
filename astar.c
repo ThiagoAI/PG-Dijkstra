@@ -67,6 +67,7 @@ int hash_a(cell* a){
      if(temp->c->x == a->x && temp->c->y == a->y){
        temp->c->f = a->f;
        temp->c->h = a->h;
+       temp->c->is_open = a->is_open;
        return;
      }
      temp = temp->next;
@@ -405,6 +406,8 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,hashmap_a* blocked_a,hea
      temp->is_open = -1;
      temp->is_closed = TRUE;
 
+     hashmap_add_a(h_a,temp);
+
      //printf("%d %d | \n\n",temp->x,temp->y);
 
      /*if(temp->x < 0){
@@ -460,6 +463,7 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,hashmap_a* blocked_a,hea
    double temp = size/2;
    double x = a->x;
    double y = a->y;
+
    glBegin(GL_QUADS);
    glVertex2f(x - temp,y - temp);
    glVertex2f(x - temp,y + temp);
@@ -467,14 +471,14 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,hashmap_a* blocked_a,hea
    glVertex2f(x + temp,y - temp);
    glEnd();
 
-   /*glLineWidth(1);
+   glLineWidth(1);
    glBegin(GL_LINE_LOOP);
    glColor3f(1,1,1);
    glVertex2f(x - temp,y - temp);
    glVertex2f(x - temp,y + temp);
    glVertex2f(x + temp,y + temp);
    glVertex2f(x + temp,y - temp);
-   glEnd();*/
+   glEnd();
  }
 
  void draw_grid_a(hashmap_a* h_a,hashmap_a* blocked_a,int gx,int gy){
@@ -483,14 +487,19 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,hashmap_a* blocked_a,hea
    int i = 0;
    //print_path(h_a,gx,gy);
    //Desenhamos as células no hashmap
-   glColor3f(0.5,0.5,0.5);
+   //glColor3f(0.5,0.5,0.5);
    for(i=0;i<h_a->size;i++){
        temp = h_a->cells[i];
        while(temp != NULL){
          //else if(temp->info.cost < 0) glColor3f(1,1,1);
          //else glColor3f(0,1,1);
-         if(temp->c->is_open >= 0) glColor3f(1,0.5,0.5);
-         else glColor3f(0.2,1,0.2);
+
+         if((int)temp->c->is_open > (int)0){
+           glColor3f(1,0.1,0.1);
+         }
+         else{
+           glColor3f(0.2,1,0.2);
+         }
 
          draw_cell_a(temp->c,1);
          temp = temp->next;
@@ -498,12 +507,12 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,hashmap_a* blocked_a,hea
      }//Fim do for
 
      //Células fechadas
-     glColor3f(1,0.4,0.4);
      for(i=0;i<blocked_a->size;i++){
          temp = blocked_a->cells[i];
          while(temp != NULL){
            //else if(temp->info.cost < 0) glColor3f(1,1,1);
            //else glColor3f(0,1,1);
+           glColor3f(1,1,1);
            draw_cell_a(temp->c,1);
            temp = temp->next;
          }//Fim do while
@@ -523,7 +532,7 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,hashmap_a* blocked_a,hea
 
        glLineWidth(5);
        glBegin(GL_LINE_STRIP);
-       glColor3f(0.9,0.9,0.3);
+       glColor3f(0.1,0.1,0.8);
 
        while(c->parent != NULL){
           glVertex3f(c->x,c->y,0.2);
