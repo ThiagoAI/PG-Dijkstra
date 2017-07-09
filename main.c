@@ -246,8 +246,8 @@ int main (int argc, char** argv){
   //Para pegar start e goal se passados
   sx = 5;
   sy = 5;
-  gx = 15;
-  gy = 15;
+  gx = 95;
+  gy = 95;
 
   if(argc > 2){
     scale_x = atoi(argv[1]);
