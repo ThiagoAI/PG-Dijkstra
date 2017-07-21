@@ -53,6 +53,10 @@ int scale_y = 6;
 int mbutton = 0;
 int mstate = 0;
 
+//Tempo levado
+double ex_time = 0.0;
+clock_t s,e;
+
 //Se quiser grid nos escuros também
 void draw_for_dark_cells(int size){
 
@@ -151,8 +155,14 @@ void KeyboardFunc(unsigned char key,int x,int y){
   switch(key){
     case 'R':
     case 'r':
+      s = clock();
       if(astar_run) astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
       else path = replan(path,h,open_h,open_list);
+      e = clock();
+      ex_time = ((double)(e - s))/ CLOCKS_PER_SEC;
+      printf("Tempo levado: %lf | Nós expandidos: %d\n",ex_time,astar_run? ex_nodes_a : ex_nodes_d);
+      if(astar_run) ex_nodes_a = 0;
+      else ex_nodes_d = 0;
       break;
     case 'G':
     case 'g':
@@ -245,9 +255,9 @@ int main (int argc, char** argv){
 
   //Para pegar start e goal se passados
   sx = 5;
-  sy = 5;
-  gx = 95;
-  gy = 95;
+  sy = 25;
+  gx = 45;
+  gy = 25;
 
   if(argc > 2){
     scale_x = atoi(argv[1]);
@@ -285,9 +295,22 @@ int main (int argc, char** argv){
   h_a = create_hashmap_a(32768);
   open_list_a = create_heap_bin_a(32768);
 
-
   //Inicializamos o algoritmo D* Lite
   init(&h,&open_h,&open_list,&path,sx,sy,gx,gy);
+
+  /*int test1 = 45;
+  int test2 = 0;
+  for(test2 = 4;test2 < 96;test2++){
+    update_cell(test1,test2,-1,h,open_h,open_list);
+    block_cell_a(blocked_a,test1,test2);
+    //test2++;
+  }
+  test1 = 55;
+  for(test2 = 4;test2 < 96;test2++){
+    update_cell(test1,test2,-1,h,open_h,open_list);
+    block_cell_a(blocked_a,test1,test2);
+    //test2++;
+  }*/
 
   //Replan inicial para já mostrar a linha reta
   path = replan(path,h,open_h,open_list);

@@ -22,6 +22,9 @@
 cell* start_a;
 cell* goal_a;
 
+//Inicializa variável global
+int ex_nodes_a = 0;
+
 //Para criar célula
 cell* create_cell_a(int x,int y){
   cell* new_cell = (cell*)malloc(sizeof(cell));
@@ -426,6 +429,9 @@ void update_sucessor(int x,int y,cell* a,hashmap_a* h_a,hashmap_a* blocked_a,hea
        printf("|| | %d | %d |%.5lf | %.5lf| %.5lf\n",u,temp->is_open,temp->g,temp->h,temp->f);*/
        return;
      }
+
+     //Para contar os nós expandidos
+     ex_nodes_a++;
 
      //Verificamos todos os 8 vizinhos
      int x_temp = temp->x;

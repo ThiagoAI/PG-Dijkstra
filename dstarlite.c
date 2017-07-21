@@ -25,7 +25,10 @@
 double k_m = 0;
 
 //Número máximo de passos (para se estiver cercado de obstáculos não rodar pra sempre)
-int max_steps = 10000;
+int max_steps = 100000;
+
+//Inicializa variável global
+int ex_nodes_d = 0;
 
 //Foward declarations
 double get_rhs(state a,hashmap* h);
@@ -431,6 +434,9 @@ int compute_shortest_path(hashmap* h,hashmap* open_h,bin_heap* open_list){
       break;
     }
 
+    //Para contar os nós explorados
+    ex_nodes_d++;
+
     //printf("OpenHash size is: %d\n",open_h->count);
     //printf("Removendo %d %d\n",u->x,u->y);
     hashmap_remove(open_h,*u);
@@ -508,7 +514,7 @@ state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_li
 
   while(neq_states(cur,goal)){
     ////printf("cur replan: %d %d\n",cur.x,cur.y);
-    //TODO falta algo no n aqui?
+
     add_list(&list,cur);
     n = get_succ(cur,h);
 

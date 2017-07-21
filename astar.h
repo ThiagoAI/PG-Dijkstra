@@ -53,6 +53,9 @@ typedef struct bin_heapstruct_a{
   cell** heap;
 }heap_a;
 
+//Para contar nós expandidos
+extern int ex_nodes_a;
+
 hashmap_a* create_hashmap_a(int size);
 heap_a* create_heap_bin_a(int size);
 void hashmap_clear_a(hashmap_a** ha,int free_cells);
