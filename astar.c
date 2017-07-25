@@ -9,6 +9,7 @@
 #include <GL/glut.h>
 
 #include "astar.h"
+#include "dstarlite.h"
 
 #define LCHILD(x) 2*x + 1
 #define RCHILD(x) 2*x + 2

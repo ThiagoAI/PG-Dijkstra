@@ -57,6 +57,28 @@ int mstate = 0;
 double ex_time = 0.0;
 clock_t s,e;
 
+//Para gravar resultados
+FILE* f;
+char nome[128];
+
+//FUNÇÕES PARA DESENHAR PAREDES DO TESTE
+//desenha uma parede vertical de y1 a y2
+void draw_v(int x1,int y1,int y2){
+  int i;
+  for(i=y1;i<y2+1;i++){
+    update_cell(x1,i,-1,h,open_h,open_list);
+    block_cell_a(blocked_a,x1,i);
+  }
+}
+//desenha uma parede horizontal de x1 a x2
+void draw_h(int x1,int x2,int y1){
+  int i;
+  for(i=x1;i<x2+1;i++){
+    update_cell(i,y1,-1,h,open_h,open_list);
+    block_cell_a(blocked_a,i,y1);
+  }
+}
+
 //Se quiser grid nos escuros também
 void draw_for_dark_cells(int size){
 
@@ -155,14 +177,20 @@ void KeyboardFunc(unsigned char key,int x,int y){
   switch(key){
     case 'R':
     case 'r':
+      //Executa o algoritmo selecionado e escreve os resultados
+      best_distance = 0;
+      ex_nodes_a = 0;
+      ex_nodes_d = 0;
+
       s = clock();
       if(astar_run) astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
       else path = replan(path,h,open_h,open_list);
       e = clock();
       ex_time = ((double)(e - s))/ CLOCKS_PER_SEC;
-      printf("Tempo levado: %lf | Nós expandidos: %d\n",ex_time,astar_run? ex_nodes_a : ex_nodes_d);
-      if(astar_run) ex_nodes_a = 0;
-      else ex_nodes_d = 0;
+
+      printf("%s | Tempo levado: %lf | Tempo computando: %lf| Nós expandidos: %d| Melhor caminho: %lf\n",astar_run? "Astar": "Dstar Lite",ex_time,astar_run? ex_time : time_computing,astar_run? ex_nodes_a : ex_nodes_d,best_distance);
+      fprintf(f,"%s, %lf, %lf, %d, %lf\n",astar_run? "Astar" : "Dstar Lite",ex_time,astar_run? ex_time : time_computing,astar_run? ex_nodes_a : ex_nodes_d,best_distance);
+
       break;
     case 'G':
     case 'g':
@@ -175,8 +203,96 @@ void KeyboardFunc(unsigned char key,int x,int y){
     case 'C':
     case 'c':
       astar_run = (astar_run == 0)? 1 : 0;
-      astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
+      s = clock();
+      if(astar_run) astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
+      e = clock();
+      ex_time = ((double)(e - s))/ CLOCKS_PER_SEC;
+      printf("%s | Tempo levado: %lf | Tempo computando: %lf| Nós expandidos: %d| Melhor caminho: %lf\n",astar_run? "Astar": "Dstar Lite",ex_time,astar_run? ex_time : time_computing,astar_run? ex_nodes_a : ex_nodes_d,best_distance);
+      fprintf(f,"%s, %lf, %lf, %d, %lf\n",astar_run? "Astar" : "Dstar Lite",ex_time,astar_run? ex_time : time_computing,astar_run? ex_nodes_a : ex_nodes_d,best_distance);
+      ex_nodes_a = 0;
+      ex_nodes_d = 0;
       break;
+    case 'Q':
+    case 'q':
+      fclose(f);
+      exit(0);
+      break;
+    case '1':
+
+      draw_v(10,-10,55);
+      draw_v(15,55,110);
+      draw_v(20,-10,55);
+      draw_v(25,55,110);
+      draw_v(35,55,110);
+      draw_v(40,-10,55);
+
+      //draw_v(150,-100,103);
+      //draw_v(150,105,300);
+
+      /*draw_v(47,23,27);
+      draw_v(43,24,25);
+      draw_v(41,25,26);
+      draw_h(35,46,23);
+      draw_h(35,46,27);*/
+
+      //draw_h(45,51,94);
+      //update_cell(51,95,-1,h,open_h,open_list);
+      //block_cell_a(blocked_a,51,95);
+      //draw_h(40,65,4);
+      //draw_h(40,65,20);
+      //draw_v(40,5,19);
+      //draw_v(55,5,15);
+      //draw_v(65,7,19);
+      //draw_v(40,5,95);
+      //draw_v(60,5,95);
+
+      //Teste 4
+      /*draw_h(-10,4,10);
+      draw_h(6,20,10);
+      draw_v(20,-10,9);
+
+      draw_h(-10,15,20);
+      draw_h(17,30,20);
+      draw_v(30,-10,3);
+      draw_v(30, 5,19);*/
+      break;
+    case '2':
+      x = 38;
+      y = 25;
+
+        draw_v(30,-10,55);
+
+      //draw_h(151,155,110);
+
+      /*update_cell(x,y,-1,h,open_h,open_list);
+      block_cell_a(blocked_a,x,y);*/
+
+      //draw_h(47,53,93);
+      //draw_h(45,59,40);
+      //draw_h(41,55,30);
+      //1
+      //for(y = 51 ;y<54;y++){
+      //}
+      //y = 94;
+      //for(x = 97;x>94;x--){
+        //update_cell(x,y,-1,h,open_h,open_list);
+        //block_cell_a(blocked_a,x,y);
+      //}
+      break;
+    case '3':
+      x = 50;
+      y = 55;
+      draw_v(36,24,25);
+      //1
+      /*for(y = 52;y<56;y++){
+        update_cell(x,y,-1,h,open_h,open_list);
+        block_cell_a(blocked_a,x,y);
+      }*/
+      break;
+    case '4':
+      draw_h(43,48,70);
+      break;
+
   }
 
 }
@@ -192,6 +308,7 @@ void MouseFunc(int button,int state,int x,int y){
 
   if((mstate = state) == GLUT_DOWN){
     if(button == GLUT_LEFT_BUTTON){
+      printf("Cell %d %d bloqueada.\n",x,y);
       update_cell(x,y,-1,h,open_h,open_list);
       block_cell_a(blocked_a,x,y);
     }
@@ -211,6 +328,7 @@ void MotionFunc(int x,int y){
 
   if(mstate == GLUT_DOWN){
     if(mbutton == GLUT_LEFT_BUTTON){
+      //printf("Cell %d %d bloqueada.\n",x,y);
       update_cell(x,y,-1,h,open_h,open_list);
       block_cell_a(blocked_a,x,y);
     }
@@ -220,44 +338,14 @@ void MotionFunc(int x,int y){
 //Argumento 1 = Arquivo
 //Argumento 2 = Binário (1) ou fibonacci (2)
 int main (int argc, char** argv){
-  /*printf("lol\n");
-  block_cell_a(blocked_a,5,6);
-  block_cell_a(blocked_a,5,5);
-  block_cell_a(blocked_a,5,6);
-  block_cell_a(blocked_a,5,4);
-  block_cell_a(blocked_a,5,3);
 
-  block_cell_a(blocked_a,10,11);
-  block_cell_a(blocked_a,10,9);
-  block_cell_a(blocked_a,9,11);
-  block_cell_a(blocked_a,9,10);
-  block_cell_a(blocked_a,9,9);
-  //block_cell_a(h_a,5,5);
-  //block_cell_a(h_a,5,5);
-
-  astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
-
-  printf("ACABOU ASTAR\n\n\n\n");
-  print_path(h_a,10,10);
-  printf("oi\n");
-  clear_heap_a(open_list_a);
-  hashmap_clear_a(&h_a,1);
-  block_cell_a(blocked_a,5,7);
-  astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
-  print_path(h_a,10,10);
-  return 0;*/
-  //Iniciando glut
-  glutInit(&argc,argv);
-  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-  glutInitWindowSize(800,600);
-  glutInitWindowPosition(100,100);
-  glutCreateWindow("dstarlite");
-
-  //Para pegar start e goal se passados
+  scale_x = 16;
+  scale_y = 12;
   sx = 5;
-  sy = 25;
+  sy = 5;
   gx = 45;
-  gy = 25;
+  gy = 45;
+  strcpy(nome,"default");
 
   if(argc > 2){
     scale_x = atoi(argv[1]);
@@ -269,10 +357,22 @@ int main (int argc, char** argv){
     gx = atoi(argv[5]);
     gy = atoi(argv[6]);
   }
-  //Reservado para passar nome de arquivo com testes...
   if(argc > 7){
-
+    strcpy(nome,argv[7]);
   }
+
+  //Abrindo Arquivo
+  char temp_nome[128];
+  strcpy(temp_nome,nome);
+  strcat(temp_nome,"_resultados.txt");
+  f = fopen(temp_nome,"a");
+
+  //Iniciando glut
+  glutInit(&argc,argv);
+  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+  glutInitWindowSize(800,600);
+  glutInitWindowPosition(100,100);
+  glutCreateWindow("dstarlite");
 
   //Display
   glutDisplayFunc(&DisplayFunc);
@@ -311,6 +411,24 @@ int main (int argc, char** argv){
     block_cell_a(blocked_a,test1,test2);
     //test2++;
   }*/
+
+  /*draw_h(12,88,2);
+  draw_h(12,88,8);
+  draw_h(47,53,93);
+
+  best_distance = 0;
+  ex_nodes_a = 0;
+  ex_nodes_d = 0;
+  astar_run = 0;
+  s = clock();
+  if(astar_run) astar(sx,sy,gx,gy,h_a,blocked_a,open_list_a);
+  else path = replan(path,h,open_h,open_list);
+  e = clock();
+  ex_time = ((double)(e - s))/ CLOCKS_PER_SEC;
+
+  printf("%s | Tempo levado: %lf | Tempo computando: %lf| Nós expandidos: %d| Melhor caminho: %lf\n",astar_run? "Astar": "Dstar Lite",ex_time,astar_run? ex_time : time_computing,astar_run? ex_nodes_a : ex_nodes_d,best_distance);
+  fprintf(f,"%s, %lf, %lf, %d, %lf\n",astar_run? "Astar" : "Dstar Lite",ex_time,astar_run? ex_time : time_computing,astar_run? ex_nodes_a : ex_nodes_d,best_distance);
+  */
 
   //Replan inicial para já mostrar a linha reta
   path = replan(path,h,open_h,open_list);

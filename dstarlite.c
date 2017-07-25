@@ -13,6 +13,7 @@
 #include "state.h"
 #include "binheap.h"
 #include "list.h"
+#include "time.h"
 
 //Constante da nossa heuristica.
 #define C1 1
@@ -29,6 +30,8 @@ int max_steps = 100000;
 
 //Inicializa variável global
 int ex_nodes_d = 0;
+double time_computing = 0.0;
+double best_distance = 0.0;
 
 //Foward declarations
 double get_rhs(state a,hashmap* h);
@@ -62,10 +65,9 @@ double cost(state a,state b,hashmap* h){
 
   hashitem* temp = hashmap_get(h,a);
   if(temp == NULL){
-    ////printf("NULL LUL %lf\n",scale*C1);
     return scale*C1;
   }
-  ////printf("LUL %d %d| %d %d| %lf\n",a.x,a.y,b.x,b.y,scale*temp->info.cost);
+
   return scale*temp->info.cost;
 }
 
@@ -491,11 +493,16 @@ int compute_shortest_path(hashmap* h,hashmap* open_h,bin_heap* open_list){
 //É nossa função principal
 state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_list){
 
+  clock_t sta,end;
   //Zeramos o caminho
   clear_list(&list);
 
+  sta = clock();
   //Encontramos o menor caminho para o objetivo e agimos apropriadamente
   int res = compute_shortest_path(h,open_h,open_list);
+  end = clock();
+  time_computing = ((double)(end-sta))/CLOCKS_PER_SEC;
+  //printf("shortest: %lf\n",tempo);
 
   //Se não há caminho...
   if(res < 0){
@@ -512,20 +519,20 @@ state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_li
     return FALSE;
   }
 
+  //sta = clock();
   while(neq_states(cur,goal)){
     ////printf("cur replan: %d %d\n",cur.x,cur.y);
-
     add_list(&list,cur);
     n = get_succ(cur,h);
 
     //Se a lista está vazia...
     if(n == NULL){
-      //printf("ERRO 3: Nao ha caminho para o objetivo\n");
       return FALSE;
     }
-    ////printf("t2: %d %d %d %d\n",);
+
     double cmin = DBL_MAX;
     double tmin = 0;
+    double temp_best = 0;
     state smin;
     state* i;
     state_list* e = n;
@@ -537,6 +544,8 @@ state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_li
       ////printf("info replan: x %d y %d \n",i->x,i->y);
       //if(occupied(*i,h)) continue;
       double val = cost(cur,*i,h);
+      double temp = val;
+
       double val2 = true_dist(*i,goal) + true_dist(start,*i);
       val += get_g(*i,h);
       ////printf("info replan: %d %d|val2 - %.2lf|cost - %.2lf ",i->x,i->y,val2,cost(cur,*i,h));
@@ -550,19 +559,29 @@ state_list* replan(state_list* list,hashmap* h,hashmap* open_h,bin_heap* open_li
           tmin = val2;
           cmin = val;
           smin = *i;
+          temp_best = temp;
         }
       }
       else if (val < cmin){
         tmin = val2;
         cmin = val;
         smin = *i;
+        temp_best = temp;
       }
     }//for
 
+    best_distance += temp_best;
     clear_list(&n);
     cur = smin;
   }//while neq
+  printf("%d %d %d %d | %lf\n",cur.x,cur.y,goal.x,goal.y,cost(cur,goal,h));
+
   add_list(&list,goal);
+  //end = clock();
+
+  //tempo = ((double)(end-sta))/CLOCKS_PER_SEC;
+  //printf("path: %lf | %d\n",tempo,z);
+
   return list;
 }
 

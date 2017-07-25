@@ -98,7 +98,7 @@ state* pop(bin_heap* heap){
 	heap->heap[0] = heap->heap[heap->n - 1];
 	heap->heap[heap->n - 1] = NULL;
 	heap->n--;
-	
+
 	//Acerta heap
 	heapify(heap,0);
 

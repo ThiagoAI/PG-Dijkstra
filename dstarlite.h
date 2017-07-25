@@ -12,7 +12,9 @@ state start;
 state last;
 
 //Para contar nós expandidos
-extern int ex_nodes_d; 
+extern int ex_nodes_d;
+extern double time_computing;
+extern double best_distance;
 
 void init(hashmap** h2,hashmap** open_h2,bin_heap** open_list2,state_list** path2,int sx,int sy,int gx,int gy);
 void update_cell(int a,int b, double val,hashmap* h,hashmap* open_h,bin_heap* open_list);
